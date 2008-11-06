@@ -13,11 +13,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package approdictio.dict;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import approdictio.levenshtein.CostFunctions;
+import approdictio.levenshtein.LevenshteinMetric;
 
 /**
  * <p>
@@ -50,7 +60,7 @@ public class Didyoumean {
    * creates a {@code Didyoumean} backed by an {@link NgramDict}.
    * </p>
    */
-  public Didyoumean instanceNgramDict(int n, char noChar,
+  public static Didyoumean instanceNgramDict(int n, char noChar,
                                       IntMetric<String> metric, int maxDist)
   {
     return new Didyoumean(new NgramDict(n, noChar, metric, maxDist));
@@ -61,8 +71,9 @@ public class Didyoumean {
    * creates a {@code Didyoumean} backed by a {@link BKTree}.
    * </p>
    */
-  public Didyoumean instanceBKTree(IntMetric<String> metric, int maxDist) {
-    final Dictionary<String, Integer> d = new BKTree<String>(metric, maxDist);
+  public static Didyoumean instanceBKTree(IntMetric<String> metric, int maxDist) {
+    final Dictionary<String, Integer> d =
+        new BKTree<String>(metric, maxDist);
     return new Didyoumean(d);
   }
   /* +***************************************************************** */
@@ -81,6 +92,35 @@ public class Didyoumean {
     }
   }
   /* +***************************************************************** */
+  public void addFile(String fname, char separator, String encoding)
+    throws IOException
+  {
+    String splitRe = "[" + separator + "]";
+    InputStream in = new FileInputStream(fname);
+    BufferedReader bin =
+        new BufferedReader(new InputStreamReader(in, encoding));
+    String line = null;
+    int lcount = 0;
+    while( null != (line = bin.readLine()) ) {
+      lcount += 1;
+      String[] p = line.trim().split(splitRe);
+      // FIX ME: add error logging
+      if( p.length != 2 || p[0].length() == 0 || p[1].length() == 0 ) {
+        System.err.printf("%s%d: cannot find the format `text:int'", fname,
+                          lcount);
+      }
+      int weight = 0;
+      try {
+        weight = Integer.parseInt(p[1]);
+      } catch( NumberFormatException e ) {
+        System.err.printf("%s%d: cannot find the format `text:int'", fname,
+                          lcount);
+        continue;
+      }
+      add(p[0], weight);
+    }
+  }
+  /* +***************************************************************** */
   /**
    * <p>
    * looks up the word in the internal {@link Dictionary} and then filters
@@ -93,7 +133,7 @@ public class Didyoumean {
    */
   public List<ResultElem<String, Integer>> lookup(String word) {
     List<ResultElem<String, Integer>> tmp = dict.lookup(word);
-
+    System.out.printf("%s%n", tmp);
     List<ResultElem<String, Integer>> result =
         new ArrayList<ResultElem<String, Integer>>();
 
@@ -104,5 +144,14 @@ public class Didyoumean {
     }
     Collections.sort(result, ResultElem.cmpResult);
     return result;
+  }
+  /*+******************************************************************/
+  public static void main(String[] argv) throws Exception {
+    IntMetric<String> metric = new LevenshteinMetric(CostFunctions.caseIgnore);
+    Didyoumean dym = instanceNgramDict(3, '$', metric, 2);
+    dym.addFile(argv[0], ':', "UTF-8");
+    for(int i=1; i<argv.length; i++) {
+      System.out.printf("%s%n", dym.lookup(argv[i]));
+    }
   }
 }
