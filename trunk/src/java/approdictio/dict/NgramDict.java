@@ -42,10 +42,12 @@ public class NgramDict implements Dictionary<String, Integer> {
   // the length of the n-grams
   private final int N;
 
-  private final char noChar;
+  private final char noChar = '\uffff';
 
   private final IntMetric<String> metric;
 
+  private final int maxDist;
+  
   // an index mapping ngrams to their strings.
   private final Map<String, Set<String>> index =
       new HashMap<String, Set<String>>();
@@ -61,14 +63,14 @@ public class NgramDict implements Dictionary<String, Integer> {
    * 
    * @throws IllegalArgumentException if {@code n} is not greater zero.
    */
-  public NgramDict(int n, char noChar, IntMetric<String> metric) {
+  public NgramDict(int n, IntMetric<String> metric, int maxDist) {
     if( n < 1 ) {
       throw new IllegalArgumentException("n must be greater zero "
           + " but is " + n);
     }
     this.N = n;
-    this.noChar = noChar;
     this.metric = metric;
+    this.maxDist = maxDist;
   }
   /* +***************************************************************** */
   private Set<String> notinuse_ngrams(String s) {
@@ -270,7 +272,7 @@ public class NgramDict implements Dictionary<String, Integer> {
     
     for(ResultElem<String, Integer> re : l) {
       int d = metric.d(query, re.value);
-      if( d > best ) continue;
+      if( d>maxDist || d>best ) continue;
       best = d;
       result.add(new ResultElem<String, Integer>(re.value, d));
     }
@@ -291,7 +293,7 @@ public class NgramDict implements Dictionary<String, Integer> {
   public static void main(String[] argv) throws Exception {
     IntMetric<String> metric =
         new LevenshteinMetric(CostFunctions.caseIgnore);
-    NgramDict t = new NgramDict(3, '$', metric);
+    NgramDict t = new NgramDict(3, metric, 2);
     Util.readFileDict(argv[0], t);
     System.out.println("starting lookup");
     long start = System.currentTimeMillis();

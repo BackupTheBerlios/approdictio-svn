@@ -57,10 +57,11 @@ public class Didyoumean {
    * creates a {@code Didyoumean} backed by an {@link NgramDict}.
    * </p>
    */
-  public static Didyoumean instanceNgramDict(int n, char noChar,
-                                             IntMetric<String> metric)
+  public static Didyoumean instanceNgramDict(int n,
+                                             IntMetric<String> metric,
+                                             int maxDist)
   {
-    return new Didyoumean(new NgramDict(n, noChar, metric));
+    return new Didyoumean(new NgramDict(n, metric, maxDist));
   }
   /* +***************************************************************** */
   /**
@@ -153,7 +154,7 @@ public class Didyoumean {
   public static void main(String[] argv) throws Exception {
     IntMetric<String> metric =
         new LevenshteinMetric(CostFunctions.caseIgnore);
-    Didyoumean dym = instanceNgramDict(3, '$', metric);
+    Didyoumean dym = instanceNgramDict(3, metric, 2);
     //Didyoumean dym = instanceBKTree(metric, 2);
     long start = System.currentTimeMillis();
     dym.addFile(argv[0], ':', "UTF-8");
