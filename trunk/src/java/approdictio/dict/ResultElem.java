@@ -29,19 +29,30 @@ public class ResultElem<T, DTYPE> {
   public final DTYPE d;
 
   /* +***************************************************************** */
-  public static final Comparator<ResultElem<String, Integer>> cmpResult =
-      new Comparator<ResultElem<String, Integer>>() {
-        public int compare(ResultElem<String, Integer> arg0,
-                           ResultElem<String, Integer> arg1)
-        {
-          return arg0.d - arg1.d;
-        }
-      };
+  public static final Comparator<ResultElem<?, Integer>> cmpResult =
+    new Comparator<ResultElem<?, Integer>>() {
+    public int compare(ResultElem<?, Integer> arg0,
+                       ResultElem<?, Integer> arg1)
+    {
+      return arg0.d - arg1.d;
+    }
+  };
+  
+  /* +***************************************************************** */
+  public static final Comparator<ResultElem<?, Integer>> cmpResultInv =
+    new Comparator<ResultElem<?, Integer>>() {
+    public int compare(ResultElem<?, Integer> arg0,
+                       ResultElem<?, Integer> arg1)
+    {
+      return arg1.d - arg0.d;
+    }
+  };
   /* +***************************************************************** */
   ResultElem(T value, DTYPE d) {
     this.value = value;
     this.d = d;
   }
+  /*+******************************************************************/
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(value).append(':').append(d);

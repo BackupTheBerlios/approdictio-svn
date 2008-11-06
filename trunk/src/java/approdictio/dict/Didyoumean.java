@@ -15,12 +15,9 @@ package approdictio.dict;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,9 +58,9 @@ public class Didyoumean {
    * </p>
    */
   public static Didyoumean instanceNgramDict(int n, char noChar,
-                                      IntMetric<String> metric, int maxDist)
+                                             IntMetric<String> metric)
   {
-    return new Didyoumean(new NgramDict(n, noChar, metric, maxDist));
+    return new Didyoumean(new NgramDict(n, noChar, metric));
   }
   /* +***************************************************************** */
   /**
@@ -71,7 +68,9 @@ public class Didyoumean {
    * creates a {@code Didyoumean} backed by a {@link BKTree}.
    * </p>
    */
-  public static Didyoumean instanceBKTree(IntMetric<String> metric, int maxDist) {
+  public static Didyoumean instanceBKTree(IntMetric<String> metric,
+                                          int maxDist)
+  {
     final Dictionary<String, Integer> d =
         new BKTree<String>(metric, maxDist);
     return new Didyoumean(d);
@@ -133,7 +132,7 @@ public class Didyoumean {
    */
   public List<ResultElem<String, Integer>> lookup(String word) {
     List<ResultElem<String, Integer>> tmp = dict.lookup(word);
-    System.out.printf("%s%n", tmp);
+    //System.out.printf("%s%n", tmp);
     List<ResultElem<String, Integer>> result =
         new ArrayList<ResultElem<String, Integer>>();
 
@@ -142,16 +141,33 @@ public class Didyoumean {
           new ResultElem<String, Integer>(e.value, weights.get(e.value));
       result.add(newElem);
     }
-    Collections.sort(result, ResultElem.cmpResult);
+    Collections.sort(result, ResultElem.cmpResultInv);
+    if( result.size()<=1 ) return result;
+    int i = 1;
+    int d = result.get(0).d;
+    while( i<result.size() && result.get(i).d==d ) i += 1;
+    if( i<result.size() ) result = result.subList(0, i);
     return result;
   }
-  /*+******************************************************************/
+  /* +***************************************************************** */
   public static void main(String[] argv) throws Exception {
-    IntMetric<String> metric = new LevenshteinMetric(CostFunctions.caseIgnore);
-    Didyoumean dym = instanceNgramDict(3, '$', metric, 2);
+    IntMetric<String> metric =
+        new LevenshteinMetric(CostFunctions.caseIgnore);
+    Didyoumean dym = instanceNgramDict(3, '$', metric);
+    //Didyoumean dym = instanceBKTree(metric, 2);
+    long start = System.currentTimeMillis();
     dym.addFile(argv[0], ':', "UTF-8");
-    for(int i=1; i<argv.length; i++) {
-      System.out.printf("%s%n", dym.lookup(argv[i]));
+    long end = System.currentTimeMillis();
+    System.out.printf("reading dict took %dms, now starting lookup%n", end-start);
+    start = System.currentTimeMillis();
+    int count = 0;
+    for(int i = 1; i < argv.length; i++) {
+      List<ResultElem<String,Integer>> res = dym.lookup(argv[i]);
+      count = count + res.size();
+      System.out.printf("%s->%s%n", argv[i],res);
     }
+    end = System.currentTimeMillis();
+    long dt = end-start;
+    System.out.printf("dt=%dms, avg=%.2fms%n", dt, (double)dt/(argv.length-1));
   }
 }
