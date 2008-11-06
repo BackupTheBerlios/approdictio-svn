@@ -4,9 +4,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import dict.IntMetric;
-import levenshtein.CostFunctions;
-import levenshtein.LevenshteinMetric;
+import approdictio.dict.IntMetric;
+import approdictio.levenshtein.CostFunctions;
+import approdictio.levenshtein.LevenshteinMetric;
+
 
 public class TestLevenshtein {
   IntMetric[] tmp = {

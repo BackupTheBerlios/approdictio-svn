@@ -4,10 +4,15 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import levenshtein.LevenshteinMetric;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import approdictio.dict.BKTree;
+import approdictio.dict.Dictionary;
+import approdictio.dict.NgramDict;
+import approdictio.dict.ResultElem;
+import approdictio.levenshtein.LevenshteinMetric;
 
 
 public class TestDictionary {

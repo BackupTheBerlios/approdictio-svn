@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-package dict;
+package approdictio.dict;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -29,12 +29,12 @@ public class Util {
   /**
    * <p>
    * reads the filel given by its {@code fname} line by line, trims each line
-   * and then adds it to {@code dict}.
+   * and then adds it to {@code approdictio.dict}.
    * </p>
    * 
    * @param <DTYPE> is not needed here
    * @param fname the file to read
-   * @param dict the dictionary to fill
+   * @param approdictio.dict the dictionary to fill
    * @throws IOException
    */
   public static <DTYPE> void readFileDict(String fname,

@@ -11,25 +11,32 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-package dict;
+package approdictio.dict;
 
 /**
  * <p>
- * is a trivial example of {@link IntMetric} that uses
- * the difference of string length as the distance value.
+ * Defines a function to compute an integer valued metric.
  * </p>
  * 
  * @author harald
  * 
  */
-public class LengthMetric implements IntMetric<String> {
-
-  public int d(String s1, String s2) {
-    int d = s1.length() - s2.length();
-    if( d < 0 ) d = -d;
-    // int e = ((int)s1.charAt(0)) - ((int)s2.charAt(0));
-    // if( e<0 ) e = -e;
-    return d;
-  }
-
+public interface IntMetric<T> {
+  /**
+   * <p>
+   * computes the distance between the two given objects. This distance function
+   * must satisfy the requirements of a metric:
+   * </p>
+   * <ul>
+   * <li>The result must be zero if and only if the two objects are equal.</li>
+   * <li>The function must be symmetric.</li>
+   * <li>The function must satisfy the triangular inequality.</li>
+   * </ul>
+   * <p>
+   * It follows that the function must also return non negative values only.
+   * </p>
+   * 
+   * @return the distance between the objects given.
+   */
+  int d(T v1, T v2);
 }

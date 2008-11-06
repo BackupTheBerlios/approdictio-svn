@@ -11,7 +11,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-package dict;
+package approdictio.dict;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,8 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import levenshtein.CostFunctions;
-import levenshtein.LevenshteinMetric;
+import approdictio.levenshtein.CostFunctions;
+import approdictio.levenshtein.LevenshteinMetric;
+
 
 /**
  * <p>
@@ -53,7 +54,7 @@ public class NgramDict implements Dictionary<String, Integer> {
       new HashMap<String, Set<String>>();
   /* +***************************************************************** */
   // public static final class ResultElem extends
-  // dict.ResultElem<String, Integer> {
+  // approdictio.dict.ResultElem<String, Integer> {
   // public ResultElem(String value, Integer d) {
   // super(value, d);
   // }
@@ -176,7 +177,7 @@ public class NgramDict implements Dictionary<String, Integer> {
   }
   /* +***************************************************************** */
   public List<ResultElem<String, Integer>> lookup(String queryValue) {
-    List<dict.ResultElem<String, Integer>> tmp =
+    List<approdictio.dict.ResultElem<String, Integer>> tmp =
         lookupSimilarity(queryValue);
     return curate(queryValue, tmp, metric, maxDist);
   }

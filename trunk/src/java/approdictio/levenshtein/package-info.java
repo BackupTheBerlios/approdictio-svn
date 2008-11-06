@@ -11,7 +11,10 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
 /**
- * <p>provides different dictionaries for approximate lookup.</p>
+ * <p>provides an implementation of the Levensthein metric with
+ * customizable cost functions.</p>
+ * @see <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">English Wikipedia on the Levenshtein distance</a>
  */
-package dict;
+package approdictio.levenshtein;

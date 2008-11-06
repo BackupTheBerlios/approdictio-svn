@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
-<project name="AppDict" default="compile" basedir=".">
+<project name="Approdictio" default="compile" basedir=".">
   
   <target name="compile"
     description="compiles java classes">
+    <mkdir dir="Classes"/>
     <javac srcdir="."
       destdir="Classes"
       source="1.5"
@@ -12,7 +13,7 @@
       deprecation="true"
       >
       <compilerarg value="-Xlint:unchecked"/>
-      <patternset includes="src/**/*.java" />
+      <patternset includes="src/java/**/*.java" />
     </javac>
   </target>
 
@@ -21,7 +22,7 @@
       packagenames="*"
       destdir="apidoc"
       windowtitle="Approximate Lookup Dictionaries"
-      header="&lt;span style='color:red'&gt;AppDict&lt;/span&gt;"
+      header="&lt;span style='color:red'&gt;Approdictio&lt;/span&gt;"
       footer="download from XXXX"
       overview="src/java/overview.html"
       stylesheetfile="files/stylesheet.css"
@@ -31,7 +32,7 @@
   
   <target name="jar">
     <mkdir dir="dist"/>
-    <jar destfile="dist/AppDict.jar" basedir="Classes"
+    <jar destfile="dist/Approdictio.jar" basedir="Classes"
       includes="**/*.class"/>
   </target>
 
