@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <project name="Approdictio" default="compile" basedir=".">
+
+  <property name="version" value="0.9"/>
   
   <target name="compile"
     description="compiles java classes">
@@ -20,10 +22,10 @@
   <target name="javadoc" description="run javadoc to create api docs">
     <javadoc sourcepath="src/java"
       packagenames="*"
-      destdir="apidoc"
+      destdir="Approdictio-api"
       windowtitle="Approximate Lookup Dictionaries"
       header="&lt;span style='color:red'&gt;Approdictio&lt;/span&gt;"
-      footer="download from XXXX"
+      footer="&lt;a href='http://approdictio.berlios.de/'&gt;approdictio.berlios.de&lt;/a&gt;"
       overview="src/java/overview.html"
       stylesheetfile="files/stylesheet.css"
       >
@@ -32,8 +34,22 @@
   
   <target name="jar">
     <mkdir dir="dist"/>
-    <jar destfile="dist/Approdictio.jar" basedir="Classes"
-      includes="**/*.class"/>
+    <jar destfile="dist/Approdictio-${version}.jar" basedir="Classes"
+      includes="**/*.class">
+      <manifest>
+	<attribute name="version" value="${version}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="docjar" depends="javadoc">
+    <mkdir dir="dist"/>
+    <jar destfile="dist/Approdictio-doc-${version}.jar"
+      basedir="." includes="Approdictio-api/**">
+      <manifest>
+	<attribute name="version" value="${version}" />
+      </manifest>
+    </jar>
   </target>
 
   <target name="compiletests"

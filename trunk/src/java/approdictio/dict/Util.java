@@ -34,7 +34,7 @@ public class Util {
    * 
    * @param <DTYPE> is not needed here
    * @param fname the file to read
-   * @param approdictio.dict the dictionary to fill
+   * @param dict the dictionary to fill
    * @throws IOException
    */
   public static <DTYPE> void readFileDict(String fname,

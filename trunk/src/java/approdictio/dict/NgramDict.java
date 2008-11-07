@@ -34,8 +34,10 @@ import approdictio.levenshtein.LevenshteinMetric;
  * <b>Background:</b> When a term is added to the dictionary, all its
  * overlapping n-grams are computed. A map is prepared that maps n-grams to
  * the terms in which they occur. When looking up a term, the term's n-grams
- * are again computed and used to retrieve all terms that contain the same
- * n-grams.
+ * are again computed and used to retrieve candidate terms. Candidate terms
+ * have at least one n-gram in common with the query term. Further the list
+ * of candidates is trimmed by parameter {@code maxDist}. The ngram-metric
+ * used is |union(P,Q)|-|intersection(P,Q)| for n-gram sets P and Q.
  * </p>
  */
 public class NgramDict implements Dictionary<String, Integer> {
@@ -47,7 +49,7 @@ public class NgramDict implements Dictionary<String, Integer> {
   private final IntMetric<String> metric;
 
   private final int maxDist;
-  
+
   // an index mapping ngrams to their strings.
   private final Map<String, Set<String>> index =
       new HashMap<String, Set<String>>();
@@ -58,8 +60,10 @@ public class NgramDict implements Dictionary<String, Integer> {
    * </p>
    * 
    * @param n is the length of the n-grams use, must be greater zero
-   * @param noChar is the character used to pad n-grams at the start of
-   *        words. This character should better not appear in any n-grams.
+   * @param metric is the metric used to compare strings <em>after</em>
+   *        candidates were retrieved using ngram-metric.
+   * @param maxDist is used as a cutoff when retrieving candidates according
+   *        to ngram-metric (2 is a good candidate for most cases)
    * 
    * @throws IllegalArgumentException if {@code n} is not greater zero.
    */
@@ -75,11 +79,11 @@ public class NgramDict implements Dictionary<String, Integer> {
   /* +***************************************************************** */
   private Set<String> notinuse_ngrams(String s) {
     final int l = s.length();
-    
+
     Set<String> result = new HashSet<String>(l);
     char buf[] = new char[N];
     Arrays.fill(buf, noChar);
-    for(int i = 0; i<l; i++) {
+    for(int i = 0; i < l; i++) {
       System.arraycopy(buf, 1, buf, 0, N - 1);
       char ch = s.charAt(i);
       buf[N - 1] = ch;
@@ -91,11 +95,12 @@ public class NgramDict implements Dictionary<String, Integer> {
   private Set<String> ngrams(String s) {
     StringBuilder sb = new StringBuilder();
     sb.append(s);
-    while( sb.length()<N ) sb.append(noChar);
+    while( sb.length() < N )
+      sb.append(noChar);
 
-    Set<String> result = new HashSet<String>(sb.length()-N+1);
-    for(int i = 0; i<sb.length()-N+1; i++) {
-      result.add(sb.substring(i, i+N));
+    Set<String> result = new HashSet<String>(sb.length() - N + 1);
+    for(int i = 0; i < sb.length() - N + 1; i++) {
+      result.add(sb.substring(i, i + N));
     }
     return result;
   }
@@ -132,7 +137,7 @@ public class NgramDict implements Dictionary<String, Integer> {
    * terms returned here.
    * </p>
    */
-  public List<ResultElem<String, Integer>> XlookupSimilarity(
+  private List<ResultElem<String, Integer>> lookupSimilarity(
                                                              String queryValue)
   {
     // map result terms to a count of the n-grams for which they are found
@@ -182,8 +187,18 @@ public class NgramDict implements Dictionary<String, Integer> {
     return result;
   }
   /* +***************************************************************** */
-  private List<ResultElem<String, Integer>> lookupSimilarity(String queryValue)
-  {
+  /**
+   * <p>
+   * looks up elements in the dictionary according to ngram-metric. Ngram
+   * metric for terms p and q and respective ngram-sets P and Q is computed
+   * as |union(P,Q)|-|intersection(P,Q)|.
+   * </p>
+   * <p>
+   * FIXME: need to check whether this is indeed a metric.
+   * </p>
+   * 
+   */
+  private List<ResultElem<String, Integer>> ngramMetric(String queryValue) {
     Set<String> queryNgrams = ngrams(queryValue);
 
     // best score so far
@@ -211,10 +226,10 @@ public class NgramDict implements Dictionary<String, Integer> {
         tngs.retainAll(queryNgrams);
         int d = union.size() - tngs.size();
         seen.add(termFound);
-        //System.out.printf("d(%s,%s)=%d(%d) || (%s - %s)%n", queryValue,
-        //                  termFound, d, best, union, tngs);
-        if( d-N > best ) continue;
-        if( d<best ) best = d;
+        // System.out.printf("d(%s,%s)=%d(%d) || (%s - %s)%n", queryValue,
+        // termFound, d, best, union, tngs);
+        if( d - N > best ) continue;
+        if( d < best ) best = d;
         result.add(new ResultElem<String, Integer>(termFound, d));
       }
     }
@@ -222,7 +237,7 @@ public class NgramDict implements Dictionary<String, Integer> {
     int dst = 0;
     int src = 0;
     while( src < result.size() ) {
-      if( result.get(src).d-N > best ) {
+      if( result.get(src).d - N > best ) {
         src += 1;
         continue;
       }
@@ -267,19 +282,21 @@ public class NgramDict implements Dictionary<String, Integer> {
   {
     List<ResultElem<String, Integer>> result =
         new ArrayList<ResultElem<String, Integer>>(1 + l.size() / 2);
-    
+
     int best = Integer.MAX_VALUE;
-    
+
     for(ResultElem<String, Integer> re : l) {
       int d = metric.d(query, re.value);
-      if( d>maxDist || d>best ) continue;
+      if( d > maxDist || d > best ) continue;
       best = d;
       result.add(new ResultElem<String, Integer>(re.value, d));
     }
     Collections.sort(result, ResultElem.cmpResult);
     int i = 1;
-    while( i<result.size() && result.get(i).d==best ) i+=1;
-    if( i<result.size() ) result = result.subList(0, i);
+    while( i < result.size() && result.get(i).d == best ) {
+      i += 1;
+    }
+    if( i < result.size() ) result = result.subList(0, i);
     return result;
   }
   /* +***************************************************************** */
