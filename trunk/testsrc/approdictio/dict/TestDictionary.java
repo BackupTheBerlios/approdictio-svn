@@ -1,4 +1,4 @@
-package dict;
+package approdictio.dict;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +27,7 @@ public class TestDictionary {
 
     dicts = ds;
     dicts[0] =  new BKTree<String>(new LevenshteinMetric(), 2);
-    dicts[1] = new NgramDict(3, '$', lev, 3);
+    dicts[1] = new NgramDict(3, lev, 3);
   }
 
 

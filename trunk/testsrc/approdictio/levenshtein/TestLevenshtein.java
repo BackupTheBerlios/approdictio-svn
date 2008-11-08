@@ -1,4 +1,4 @@
-package levenshtein;
+package approdictio.levenshtein;
 
 import static org.junit.Assert.*;
 
