@@ -2,7 +2,8 @@
 <project name="Approdictio" default="compile" basedir=".">
 
   <property name="version" value="0.9"/>
-  
+  <taskdef resource="ant-grobocoverage.properties"/>
+
   <target name="compile"
     description="compiles java classes">
     <mkdir dir="Classes"/>
@@ -67,14 +68,41 @@
     </javac>
   </target>
 
-  <target name="unitest" depends="compile, compiletests"
+  <target name="grobo" depends="compile, compiletests">
+    <mkdir dir="coverage"/>
+    <grobo-instrument logdir="coverage/logs" logger="fast"
+      destdir="coverage/Classes">
+      <fileset dir="Classes">
+	<exclude name="**/Test*.class"/>
+      </fileset>
+      <measure type="linecount" />
+      <measure type="function" />
+    </grobo-instrument>
+  </target>
+
+
+  <target name="unitest" depends="compile, compiletests, grobo"
     description="run unit test with junit4">
+
     <junit printsummary="withOutAndErr">
-      <classpath path="Classes"/>
+      <classpath>
+	<pathelement location="coverage/Classes"/>
+	<pathelement location="Classes"/>
+      </classpath>
+      <formatter type="plain" usefile="false"/>
       <test name="dict.TestDictionary"/>
       <test name="levenshtein.TestLevenshtein"/>
     </junit>
   </target>
+
+  <target name="coverage" depends="unitest">
+    <grobo-report logdir="coverage/logs">
+      <simple destdir="coverage" removeempty="true" />
+      <source destdir="coverage/source-report" removeempty="true"
+	srcdir="src/java" title="Coverage Report of Approdictio" />
+    </grobo-report>
+  </target>
+
 
   <target name="e">
     <echoproperties/>
