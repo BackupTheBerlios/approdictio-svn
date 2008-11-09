@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    <title>Approdictio</title>
+    <script language=" javascript" type="text/javascript">
+    <!--
+      function makemail(where, title, who, name) {
+      document.write("<a href='mailto:" 
+      + who +"@"+ where.replace("#", ".") +"' "
+      + "title='" + title+"'"
+      + ">"
+      + name
+      + "<\/a>");
+      }
+      -->
+    </script>
+    <link rel="stylesheet" type="text/css" href="index.css"></link>
+    
+  </head>
+  <body>
+    <div class="navbar">
+      <h1>Management</h1>
+      <p><a href="https://developer.berlios.de/projects/approdictio/"
+	  title="Berlios project page">Project</a></p>
+      <p><a href="https://developer.berlios.de/project/showfiles.php?group_id=10293" title="Berlios download page">Download</a></p>
+
+      <h1>Documentation</h1>
+      <p><a href="api/index.html" title="generated javadoc">API</a></p>
+      <p><a href="http://svn.berlios.de/wsvn/approdictio"
+	  title="browse code">Code</a></p>
+      <p><a href="LICENSE" title="LGPL license comment">License</a></p>
+      <div style="height:2cm">&nbsp;</div>
+      
+      <h1>Sponsors</h1>
+      <p>software host<br/><a
+	  href="http://developer.berlios.de"><img
+	    src="http://developer.berlios.de/bslogo.php?group_id=10293"
+	    width="124" height="32" border="0" alt="BerliOS Logo"
+	    /></a></p>
+      
+    </div>
+    <div class="main">
+      <h1><code>approdictio</code> &mdash; Approximate
+	Dictionaries</h1>
+      <p class="subtitle">A Java Class Library</p>
+
+      <p>Approdictio provides implementations of dictionaries that
+      allow approximate lookup. When looking up a word, all words are
+      returned that are approximately equal to the word given. The
+      definition of <em>approximately equal</em> depends on the <a
+      href="http://en.wikipedia.org/wiki/Metric_(mathematics)">metric</a>
+      provided to define the distance between two words. An
+      implementation of the <a
+      href="http://en.wikipedia.org/wiki/Levenshtein_distance">Levensthein
+      Metric</a> with customizable edit costs is part of the
+	package.</p>
+
+      <p>The slightly tricky part of approximate dictionary lookup is
+	to find all similar words without explicit comparison of the
+	word to look up with all words of the dictionary. Two
+	implementations are provided that are reasonably fast:</p>
+      <dl>
+	<dt>BKTree</dt> <dd>provides an implementation of a <a
+	href="http://en.wikipedia.org/wiki/BK-tree">Burkhard-KellerTree</a>. In
+	principle, this implementation can even be used for
+	approximate lookup of other objects than strings, as long as a
+	metric is provided.</dd>
+	<dt>NgramDict</dt> <dd>indexes all words of the dictionary by
+	  their n-grams. During lookup, candidate terms are retrieved
+	  with a crude n-gram similarity. Only the candidates are
+	  compared according to the metric provided. This seems
+	  generally to be faster than the BKTree, but has the
+	  disadvantage that even the Levensthein metric is not 100%
+	  compatible with the n-gram lookup. Consequently some similar
+	  terms may be missed.</dd>
+    </div>
+  </body>
+</html>

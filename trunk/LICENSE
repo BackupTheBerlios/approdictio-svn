@@ -7,6 +7,16 @@ as available in the file lgpl-2.1.txt with one exception:
 
 Only this version of the license shall apply until further notice.
 
+
+=== My Understanding of the LGPL ===
+
+As long as you use the compiled jar in your projects or products, you
+can do what you want with it. If you download or fetch the source
+code and change it and provide the resulting project or product to
+someone else, the LGPL obliges you to provide the amended source code
+of approdictio as well. Alternatively you may convince me to add your
+changes to the original.
+
 Harald Kirsch
 
 

@@ -53,6 +53,22 @@
     </zip>
   </target>
 
+  <target name="homepage" 
+    description="publish the homepage to berlios"
+    depends="javadoc">
+    <exec executable="scp">
+      <arg value="files/index.html"/>
+      <arg value="files/index.css"/>
+      <arg value="LICENSE" />
+      <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs" />
+    </exec>
+    <exec executable="scp">
+      <arg value="-r"/>
+      <arg value="dist/ApprodictioDoc"/>
+      <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs/api" />
+    </exec>
+  </target>
+
   <target name="compiletests">
     <javac srcdir="testsrc"
       destdir="Classes"
