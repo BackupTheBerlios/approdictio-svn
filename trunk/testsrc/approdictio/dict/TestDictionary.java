@@ -2,7 +2,9 @@ package approdictio.dict;
 
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 import org.junit.Before;
@@ -30,7 +32,7 @@ public class TestDictionary {
     dicts[1] = new NgramDict(3, lev, 3);
   }
 
-
+  /*+******************************************************************/
   @Test
   public void minimalRoundtrip() {
     String[] ttt = {
@@ -51,4 +53,35 @@ public class TestDictionary {
       }
     }
   }
+  /*+******************************************************************/
+  @Test
+  public void zeroResults() {
+    for(Dictionary<String,Integer> d : dicts) {
+      d.add("aaaaa");
+      assertEquals(0, d.lookup("zzzz").size());
+    }    
+  }
+  /*+******************************************************************/
+  @Test
+  public void twoResults() {
+    String[] ttt = {
+        "ab1de", "ab2de", "ab23de", "ab44de",
+    };
+    for(Dictionary<String,Integer> d : dicts) {
+      for(String term : ttt) d.add(term);
+      String name = d.getClass().getName();
+
+      List<ResultElem<String,Integer>> l = d.lookup("abcde");
+      assertEquals(name, 2, l.size());
+      Set<String> s = new HashSet<String>(2);
+      s.add(ttt[0]);
+      s.add(ttt[1]);
+      Set<String> t = new HashSet<String>(2);
+      for(int i=0; i<2; i++) t.add(l.get(i).value);
+      assertEquals(name, s, t);
+    }    
+  }
+  /*+******************************************************************/
+
+
 }

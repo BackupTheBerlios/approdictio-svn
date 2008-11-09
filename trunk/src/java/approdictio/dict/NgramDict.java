@@ -44,7 +44,7 @@ public class NgramDict implements Dictionary<String, Integer> {
   // the length of the n-grams
   private final int N;
 
-  private final char noChar = '\uffff';
+  private final char noChar = '\u00B7';
 
   private final IntMetric<String> metric;
 
@@ -94,9 +94,10 @@ public class NgramDict implements Dictionary<String, Integer> {
   /* +***************************************************************** */
   private Set<String> ngrams(String s) {
     StringBuilder sb = new StringBuilder();
+    int r = N/2;
+    for(int i=0; i<r; i++) sb.append(noChar);
     sb.append(s);
-    while( sb.length() < N )
-      sb.append(noChar);
+    for(int i=0; i<N-r; i++) sb.append(noChar);
 
     Set<String> result = new HashSet<String>(sb.length() - N + 1);
     for(int i = 0; i < sb.length() - N + 1; i++) {
@@ -119,6 +120,7 @@ public class NgramDict implements Dictionary<String, Integer> {
       }
       values.add(value);
     }
+    //System.out.printf("%s->%s%n", value, ngrams);
   }
   /* +***************************************************************** */
   private static final class MutInt {
@@ -200,7 +202,8 @@ public class NgramDict implements Dictionary<String, Integer> {
    */
   private List<ResultElem<String, Integer>> ngramMetric(String queryValue) {
     Set<String> queryNgrams = ngrams(queryValue);
-
+    //System.out.printf("XXXX %s->%s%n", queryValue, queryNgrams);
+    
     // best score so far
     int best = Integer.MAX_VALUE;
 
@@ -233,6 +236,7 @@ public class NgramDict implements Dictionary<String, Integer> {
         result.add(new ResultElem<String, Integer>(termFound, d));
       }
     }
+    //System.out.printf("before removing: %s%n", result);
     // Now keep only the really best ones
     int dst = 0;
     int src = 0;
@@ -250,7 +254,8 @@ public class NgramDict implements Dictionary<String, Integer> {
   /* +***************************************************************** */
   public List<ResultElem<String, Integer>> lookup(String queryValue) {
     List<approdictio.dict.ResultElem<String, Integer>> tmp =
-        lookupSimilarity(queryValue);
+        ngramMetric(queryValue);
+    //System.out.printf("...%s%n", tmp);
     return curate(queryValue, tmp, metric);
   }
   /* +***************************************************************** */

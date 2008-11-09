@@ -22,6 +22,9 @@ package approdictio.levenshtein;
  * 
  */
 public class CostFunctions {
+  // Nothing to instantiate here.
+  private CostFunctions() {}
+
   // +********************************************************************
   /**
    * <p>

@@ -78,7 +78,7 @@ public class LevenshteinMetric implements IntMetric<String> {
       }
 
     }
-    // System.out.printf("%s--%s: %d%n", v1, v2, d[m-1][n-1]);
+    //System.out.printf("%s--%s: %d%n", v1, v2, d[m-1][n-1]);
     return d[m - 1][n - 1];
   }
   // +********************************************************************

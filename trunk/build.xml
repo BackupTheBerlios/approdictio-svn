@@ -1,44 +1,46 @@
 <?xml version="1.0"?>
 <project name="Approdictio" default="compile" basedir=".">
 
-  <property name="version" value="0.9"/>
-  <taskdef resource="ant-grobocoverage.properties"/>
+  <!-- To get this going, emma.jar must be in the ant classpath. One
+  way to have this is to put it into ${user.home}/.ant/lib -->
+  <taskdef resource="emma_ant.properties" />
 
-  <target name="compile"
-    description="compiles java classes">
+  <target name="compile" description="compiles java classes">
     <mkdir dir="Classes"/>
-    <javac srcdir="."
+    <javac srcdir="src/java"
       destdir="Classes"
-      source="1.5"
+      source="1.6"
       listfiles="no"
       fork="false"
       debug="true"
       deprecation="true"
       >
       <compilerarg value="-Xlint:unchecked"/>
-      <patternset includes="src/java/**/*.java" />
+      <patternset includes="approdictio/**/*.java" />
     </javac>
   </target>
 
   <target name="javadoc" description="run javadoc to create api docs">
     <javadoc sourcepath="src/java"
       packagenames="*"
-      destdir="Approdictio-api"
+      destdir="dist/Approdictio-doc"
       windowtitle="Approximate Lookup Dictionaries"
-      header="&lt;span style='color:red'&gt;Approdictio&lt;/span&gt;"
-      footer="&lt;a href='http://approdictio.berlios.de/'&gt;approdictio.berlios.de&lt;/a&gt;"
+      header="&lt;span class='approheader'&gt;Approdictio&lt;/span&gt;"
       overview="src/java/overview.html"
       stylesheetfile="files/stylesheet.css"
+      Bottom="&lt;div class=&quot;approlink&quot;>download: &lt;a
+      href='https://developer.berlios.de/project/showfiles.php?group_id=10293' target='_top'>developer.berlios.de&lt;/a>&lt;br/>home page: &lt;a href=&quot;http://approdictioa.berlios.de/&quot; target='_top'>approdictio.berlios.de&lt;/a>&lt;/div>"
       >
     </javadoc>
   </target> 
   
-  <target name="jar">
+  <target name="jar" depends="compile, svnversion">
     <mkdir dir="dist"/>
-    <jar destfile="dist/Approdictio-${version}.jar" basedir="Classes"
+    <jar destfile="dist/Approdictio-${svn.revision}.jar" basedir="Classes"
       includes="**/*.class">
       <manifest>
-	<attribute name="version" value="${version}" />
+	<attribute name="version" value="${svn.revision}" />
+	<attribute name="timestamp" value="${time.now}" />
       </manifest>
     </jar>
   </target>
@@ -46,63 +48,103 @@
   <target name="docjar" depends="javadoc">
     <mkdir dir="dist"/>
     <jar destfile="dist/Approdictio-doc-${version}.jar"
-      basedir="." includes="Approdictio-api/**">
+      basedir="." includes="dist/Approdictio-doc/**">
       <manifest>
 	<attribute name="version" value="${version}" />
       </manifest>
     </jar>
   </target>
 
-  <target name="compiletests"
-    description="compiles java test classes">
-    <javac srcdir="."
+  <target name="compiletests">
+    <javac srcdir="testsrc"
       destdir="Classes"
-      source="1.5"
+      source="1.6"
       listfiles="no"
       fork="false"
       debug="true"
       deprecation="true"
       >
       <compilerarg value="-Xlint:unchecked"/>
-      <patternset includes="testsrc/**/*.java" />
+      <patternset includes="**/*.java" />
     </javac>
   </target>
 
-  <target name="grobo" depends="compile, compiletests">
-    <mkdir dir="coverage"/>
-    <grobo-instrument logdir="coverage/logs" logger="fast"
-      destdir="coverage/Classes">
-      <fileset dir="Classes">
-	<exclude name="**/Test*.class"/>
-      </fileset>
-      <measure type="linecount" />
-      <measure type="function" />
-    </grobo-instrument>
-  </target>
-
-
-  <target name="unitest" depends="compile, compiletests, grobo"
+  <target name="unitest" depends="compile, compiletests, emmainstr"
     description="run unit test with junit4">
 
-    <junit printsummary="withOutAndErr">
+    <junit printsummary="withOutAndErr" fork="yes">
+      <jvmarg value="-Demma.coverage.out.file=dist/coverage/emmadata.ec"/>
       <classpath>
-	<pathelement location="coverage/Classes"/>
+	<pathelement location="${user.home}/.ant/lib/emma.jar"/>
+	<pathelement location="dist/coverage/Classes"/>
 	<pathelement location="Classes"/>
       </classpath>
       <formatter type="plain" usefile="false"/>
-      <test name="dict.TestDictionary"/>
-      <test name="levenshtein.TestLevenshtein"/>
+      <test name="approdictio.dict.TestDictionary"/>
+      <test name="approdictio.levenshtein.TestLevenshtein"/>
     </junit>
   </target>
 
-  <target name="coverage" depends="unitest">
-    <grobo-report logdir="coverage/logs">
-      <simple destdir="coverage" removeempty="true" />
-      <source destdir="coverage/source-report" removeempty="true"
-	srcdir="src/java" title="Coverage Report of Approdictio" />
-    </grobo-report>
+  <target name="emmainstr">
+    <delete dir="dist/coverage/Classes"/>
+    <emma verbosity="quiet">
+      <instr instrpath="Classes"
+	destdir="dist/coverage/Classes"
+	metadatafile="dist/coverage/emmadata.em"
+	merge="false">
+	<filter excludes="*.Test*"/>
+      </instr>
+    </emma>
   </target>
 
+  <target name="coverage" depends="unitest"
+    description="run unit test collecting coverage data and produce a report">
+    <emma verbosity="quiet">
+      <report sourcepath="src/java" 
+	columns="name,line,block,method"
+	sort="+line,+block,+method"
+	metrics="line:95"
+	>
+	<fileset dir="coverage">
+	  <!-- find emmadata.ec. and emmadata.em -->
+	  <include name="emmadata.*" />
+	</fileset>
+	
+	<html outfile="dist/coverage/coverage.html" />
+      </report>
+    </emma>
+  </target>
+
+  <!-- Get subversion revision and whether the working dir is dirty
+  with regard to the repository. (Since subversion tasks are still not
+  standard with ant, use exec -->
+  <target name="svnversion">
+    <exec executable="svn" output="dist/svnstatus">
+      <arg value="status"/> <arg value="-u"/>
+    </exec>
+    <!-- set svn.clean to "." if svnstatus has only one line -->
+    <loadfile property="svn.clean" srcFile="dist/svnstatus">
+      <filterchain>
+	<replaceregex pattern=".*" replace="."/>
+	<striplinebreaks/>
+      </filterchain>
+    </loadfile>
+
+    <loadfile property="svn.revid" srcFile="dist/svnstatus">
+      <filterchain>
+	<tailfilter lines="1"/>
+	<replaceregex pattern=".[^0-9]*" replace=""/>
+	<striplinebreaks/>
+      </filterchain>
+    </loadfile>
+    <condition property="svn.revision" value="${svn.revid}" else="dirty">
+      <equals arg1="${svn.clean}" arg2="." />
+    </condition>
+  </target>
+
+  <tstamp>
+    <format property="time.now" pattern="yyyy-MM-dd hh:mm:ss"/>
+  </tstamp>
 
   <target name="e">
     <echoproperties/>

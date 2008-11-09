@@ -181,8 +181,9 @@ public class BKTree<V> implements Dictionary<V, Integer> {
                       V value, int maxDist)
   {
     int d = metric.d(node.getValue(), value);
-    if( d <= maxDist )
+    if( d <= maxDist ) {
       result.add(new ResultElem<V, Integer>(node.getValue(), d));
+  }
     int from = d - maxDist;
     if( from < 0 ) from = 0;
     int to = d + maxDist;
@@ -206,19 +207,15 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     lookup(root, result, queryValue, maxDist);
     if( result.size()==0 ) return result;
     
-    Collections.sort(result, new Comparator<ResultElem<V, Integer>>() {
-      public int compare(ResultElem<V, Integer> arg0,
-                         ResultElem<V, Integer> arg1)
-      {
-        return arg0.d - arg1.d;
-      }
-    });
-
-    // leave over only the closes elements
+    Collections.sort(result,ResultElem.cmpResult);
+    //System.out.printf("...%s%n", result);
+    // leave over only the closest elements
     int best = result.get(0).d;
     int l=1;
     while( l<result.size() && result.get(l).d==best) l += 1;
-    return result.subList(0, l);
+    result = result.subList(0, l);
+    //System.out.printf(";;;%s%n", result);
+    return result;
   }
   // +********************************************************************
   /**
