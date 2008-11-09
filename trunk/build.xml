@@ -65,8 +65,14 @@
     <exec executable="rsync" spawn="true">
       <arg value="--delete"/>
       <arg value="-az"/>
-      <arg value="dist/ApprodictioDoc/"/>
+      <arg value="dist/ApprodictioDoc/" />
       <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs/api" />
+    </exec>
+    <exec executable="rsync" spawn="true">
+      <arg value="--delete"/>
+      <arg value="-az"/>
+      <arg value="dist/covereport/" />
+      <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs/covereport" />
     </exec>
   </target>
 
@@ -87,16 +93,22 @@
   <target name="unitest" depends="compile, compiletests, emmainstr"
     description="run unit test with junit4">
 
-    <junit printsummary="withOutAndErr" fork="yes">
+    <junit fork="yes"> <!-- printsummary="withOutAndErr" -->
       <jvmarg value="-Demma.coverage.out.file=dist/coverage/emmadata.ec"/>
       <classpath>
 	<pathelement location="${user.home}/.ant/lib/emma.jar"/>
 	<pathelement location="dist/coverage/Classes"/>
 	<pathelement location="Classes"/>
       </classpath>
+
       <formatter type="plain" usefile="false"/>
-      <test name="approdictio.dict.TestDictionary"/>
-      <test name="approdictio.levenshtein.TestLevenshtein"/>
+
+      <batchtest fork="yes">
+	<fileset dir="Classes">
+	  <include name="**/Test*.class"/>
+	  <exclude name="**/*$*.class"/>
+	</fileset>
+      </batchtest>
     </junit>
   </target>
 
@@ -120,12 +132,12 @@
 	sort="+line,+block,+method"
 	metrics="line:95"
 	>
-	<fileset dir="coverage">
+	<fileset dir="dist/coverage">
 	  <!-- find emmadata.ec. and emmadata.em -->
 	  <include name="emmadata.*" />
 	</fileset>
 	
-	<html outfile="dist/coverage/coverage.html" />
+	<html outfile="dist/covereport/coverage.html" />
       </report>
     </emma>
   </target>

@@ -229,8 +229,8 @@ public class NgramDict implements Dictionary<String, Integer> {
         tngs.retainAll(queryNgrams);
         int d = union.size() - tngs.size();
         seen.add(termFound);
-        // System.out.printf("d(%s,%s)=%d(%d) || (%s - %s)%n", queryValue,
-        // termFound, d, best, union, tngs);
+        //System.out.printf("d(%s,%s)=%d(%d) || (%s - %s)%n", queryValue,
+          //                termFound, d, best, union, tngs);
         if( d - N > best ) continue;
         if( d < best ) best = d;
         result.add(new ResultElem<String, Integer>(termFound, d));

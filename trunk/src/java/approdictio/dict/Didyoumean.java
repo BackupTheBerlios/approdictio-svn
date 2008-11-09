@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,6 +89,7 @@ public class Didyoumean {
    * </p>
    */
   public void add(String term, int weight) {
+    //System.out.printf("dym add: [%s:%d]%n", term, weight);
     Integer w = weights.get(term);
     if( w != null ) {
       weights.put(term, new Integer(weight + w.intValue()));
@@ -104,42 +106,71 @@ public class Didyoumean {
    * separator character provided and an integer weight. Both, term and
    * weight, are trimmed before used respectively parsed.
    * </p>
-   * <p>
-   * Malformed lines are ignored, except for an error message on
-   * {@code System.err}.
-   * </p>
    * 
    * @param fname is the file to read
    * @param separator is the character used in the file to separate the term
    *        from the weight
    * @param encoding is the character encoding of the file to read
+   * @throws FileFormatException if the file contains a line that does not
+   *         have the format described above.
    */
   public void addFile(String fname, char separator, String encoding)
-    throws IOException
+    throws IOException, FileFormatException
   {
-    String splitRe = "[" + separator + "]";
     InputStream in = new FileInputStream(fname);
-    BufferedReader bin =
-        new BufferedReader(new InputStreamReader(in, encoding));
+    Reader r = new InputStreamReader(in, encoding);
+    try {
+      addFile(r, separator);
+    } catch( FileFormatException e ) {
+      e.printStackTrace();
+      throw new FileFormatException(fname + e.getMessage(), e.getLineNo());
+    } finally {
+      r.close();
+    }
+  }
+  /* +***************************************************************** */
+  /**
+   * <p>
+   * feeds {@code Didyoumean} with terms and weights from a {@code Reader}.
+   * This method works exactly like the three parameter method
+   * {@link #addFile(String,char,String) addFile}, except that it is up to
+   * the caller to provide alrady a {@code Reader}.
+   * </p>
+   */
+  public void addFile(Reader in, char separator) throws IOException,
+    FileFormatException
+  {
+    BufferedReader bin;
+    if( in instanceof BufferedReader ) bin = (BufferedReader) in;
+    else bin = new BufferedReader(in);
+
+    String splitRe = "[" + separator + "]";
     String line = null;
     int lcount = 0;
     while( null != (line = bin.readLine()) ) {
       lcount += 1;
       String[] p = line.split(splitRe);
-      // FIX ME: add error logging
-      if( p.length != 2 || p[0].length() == 0 || p[1].length() == 0 ) {
-        System.err.printf("%s%d: cannot find the format `text:int'", fname,
-                          lcount);
+
+      if( p.length != 2 ) {
+        throw new FileFormatException("" + lcount
+            + ": cannot find the format `text:int'", lcount);
       }
+
+      p[0] = p[0].trim();
+      p[1] = p[1].trim();
+      if( p[0].length() == 0 || p[1].length() == 0 ) {
+        throw new FileFormatException("" + lcount
+            + ": cannot find the format `text:int'", lcount);
+      }
+
       int weight = 0;
       try {
-        weight = Integer.parseInt(p[1].trim());
+        weight = Integer.parseInt(p[1]);
       } catch( NumberFormatException e ) {
-        System.err.printf("%s%d: cannot find the format `text:int'", fname,
-                          lcount);
-        continue;
+        throw new FileFormatException("" + lcount
+            + ": cannot find the format `text:int'", lcount);
       }
-      add(p[0].trim(), weight);
+      add(p[0], weight);
     }
   }
   /* +***************************************************************** */
@@ -172,6 +203,16 @@ public class Didyoumean {
       i += 1;
     if( i < result.size() ) result = result.subList(0, i);
     return result;
+  }
+  /* +***************************************************************** */
+  /**
+   * <p>
+   * mainly to support inspection an debugging, the class (not the object) of
+   * the internally used {@link Dictionary} is returned.
+   * </p>
+   */
+  public Class<? extends Dictionary> getDictClass() {
+    return dict.getClass();
   }
   /* +***************************************************************** */
   /**

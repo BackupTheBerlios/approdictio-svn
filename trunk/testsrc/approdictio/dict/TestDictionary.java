@@ -10,10 +10,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import approdictio.dict.BKTree;
-import approdictio.dict.Dictionary;
-import approdictio.dict.NgramDict;
-import approdictio.dict.ResultElem;
 import approdictio.levenshtein.LevenshteinMetric;
 
 
@@ -28,7 +24,7 @@ public class TestDictionary {
     Dictionary<String,Integer>[] ds = new Dictionary[2];
 
     dicts = ds;
-    dicts[0] =  new BKTree<String>(new LevenshteinMetric(), 2);
+    dicts[0] =  new BKTree<String>(lev, 2);
     dicts[1] = new NgramDict(3, lev, 3);
   }
 
@@ -80,6 +76,30 @@ public class TestDictionary {
       for(int i=0; i<2; i++) t.add(l.get(i).value);
       assertEquals(name, s, t);
     }    
+  }
+  /*+******************************************************************/
+  @Test(expected=IllegalArgumentException.class)
+  public void zeroNgram() {
+    new NgramDict(0, new LevenshteinMetric(), 2);
+  }
+  /*+******************************************************************/
+  @Test
+  public void widespreadDict() {
+    String[] ttt = {
+        "a", "00000a00000", "00000a00000bbbbbbbbbb"     
+    };
+    for(Dictionary<String,Integer> d : dicts) {
+      for(String term : ttt) d.add(term);
+      String name = d.getClass().getName();
+
+      List<ResultElem<String,Integer>> l = d.lookup("00000a00000bbbbbbbbbb");
+      assertEquals(name, 1, l.size());
+      assertEquals(name, ttt[2], l.get(0).value);
+      
+      l = d.lookup("00000a00000bbbbbbbbbc");
+      assertEquals(name, 1, l.size());
+      assertEquals(name, ttt[2], l.get(0).value);
+    }
   }
   /*+******************************************************************/
 
