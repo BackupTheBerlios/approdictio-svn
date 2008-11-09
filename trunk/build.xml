@@ -20,12 +20,13 @@
     </javac>
   </target>
 
-  <target name="javadoc" description="run javadoc to create api docs">
+  <target name="javadoc" depends="svnrevision"
+    description="run javadoc to create api docs">
     <javadoc sourcepath="src/java"
       packagenames="*"
-      destdir="dist/Approdictio-doc"
+      destdir="dist/ApprodictioDoc"
       windowtitle="Approximate Lookup Dictionaries"
-      header="&lt;span class='approheader'&gt;Approdictio&lt;/span&gt;"
+      header="&lt;span class='approheader'&gt;Approdictio v${svn.revision}&lt;/span&gt;"
       overview="src/java/overview.html"
       stylesheetfile="files/stylesheet.css"
       Bottom="&lt;div class=&quot;approlink&quot;>download: &lt;a
@@ -34,12 +35,12 @@
     </javadoc>
   </target> 
   
-  <target name="jar" depends="compile, svnversion">
+  <target name="jar" depends="compile, svnrevision">
     <mkdir dir="dist"/>
     <jar destfile="dist/Approdictio-${svn.revision}.jar" basedir="Classes"
       includes="**/*.class">
       <manifest>
-	<attribute name="version" value="${svn.revision}" />
+	<attribute name="svn-revision" value="${svn.revision}" />
 	<attribute name="timestamp" value="${time.now}" />
       </manifest>
     </jar>
@@ -47,12 +48,9 @@
 
   <target name="docjar" depends="javadoc">
     <mkdir dir="dist"/>
-    <jar destfile="dist/Approdictio-doc-${version}.jar"
-      basedir="." includes="dist/Approdictio-doc/**">
-      <manifest>
-	<attribute name="version" value="${version}" />
-      </manifest>
-    </jar>
+    <zip destfile="dist/ApprodictioDoc-${svn.revision}.zip"
+      basedir="dist" includes="ApprodictioDoc/**">
+    </zip>
   </target>
 
   <target name="compiletests">
@@ -118,7 +116,7 @@
   <!-- Get subversion revision and whether the working dir is dirty
   with regard to the repository. (Since subversion tasks are still not
   standard with ant, use exec -->
-  <target name="svnversion">
+  <target name="svnrevision">
     <exec executable="svn" output="dist/svnstatus">
       <arg value="status"/> <arg value="-u"/>
     </exec>

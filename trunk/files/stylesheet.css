@@ -71,14 +71,17 @@ a:active[href] { color: #ff6666; text-decoration: underline; }
 }
 
 .NavBarCell2    {
-  border-top: 1px dotted #665522;
+  /* border-top: 1px dotted #665522;*/
   font-family: Arial, Helvetica, sans-serif;
-  background-color:#ddcf9f;
+  /* background-color:#ddcf9f;*/
+  background-color: #ffffee;
   color:#000000
 }
 .NavBarCell3    {
+  border-top: 1px dotted #665522;
   font-family: Arial, Helvetica, sans-serif; 
-  background-color:#ddcf9f;
+  /* background-color:#ddcf9f; */
+  background-color: #ffffee;
   color:#000000;
 }
 
