@@ -30,7 +30,7 @@
       overview="src/java/overview.html"
       stylesheetfile="files/stylesheet.css"
       Bottom="&lt;div class=&quot;approlink&quot;>download: &lt;a
-      href='https://developer.berlios.de/project/showfiles.php?group_id=10293' target='_top'>developer.berlios.de&lt;/a>&lt;br/>home page: &lt;a href=&quot;http://approdictioa.berlios.de/&quot; target='_top'>approdictio.berlios.de&lt;/a>&lt;/div>"
+      href='https://developer.berlios.de/project/showfiles.php?group_id=10293' target='_top'>developer.berlios.de&lt;/a>&lt;br/>home page: &lt;a href=&quot;http://approdictio.berlios.de/&quot; target='_top'>approdictio.berlios.de&lt;/a>&lt;/div>"
       >
     </javadoc>
   </target> 
@@ -62,9 +62,10 @@
       <arg value="LICENSE" />
       <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs" />
     </exec>
-    <exec executable="scp">
-      <arg value="-r"/>
-      <arg value="dist/ApprodictioDoc"/>
+    <exec executable="rsync" spawn="true">
+      <arg value="--delete"/>
+      <arg value="-az"/>
+      <arg value="dist/ApprodictioDoc/"/>
       <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs/api" />
     </exec>
   </target>
