@@ -21,7 +21,6 @@ import java.util.List;
 
 import approdictio.levenshtein.LevenshteinMetric;
 
-
 /**
  * <p>
  * An dicionary implementation using <em>Burkhard Keller Tree</em>s. This
@@ -183,7 +182,7 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     int d = metric.d(node.getValue(), value);
     if( d <= maxDist ) {
       result.add(new ResultElem<V, Integer>(node.getValue(), d));
-  }
+    }
     int from = d - maxDist;
     if( from < 0 ) from = 0;
     int to = d + maxDist;
@@ -205,16 +204,17 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     List<ResultElem<V, Integer>> result =
         new ArrayList<ResultElem<V, Integer>>();
     lookup(root, result, queryValue, maxDist);
-    if( result.size()==0 ) return result;
-    
-    Collections.sort(result,ResultElem.cmpResult);
-    //System.out.printf("...%s%n", result);
+    if( result.size() == 0 ) return result;
+
+    Collections.sort(result, ResultElem.cmpResult);
+    // System.out.printf("...%s%n", result);
     // leave over only the closest elements
     int best = result.get(0).d;
-    int l=1;
-    while( l<result.size() && result.get(l).d==best) l += 1;
+    int l = 1;
+    while( l < result.size() && result.get(l).d == best )
+      l += 1;
     result = result.subList(0, l);
-    //System.out.printf(";;;%s%n", result);
+    // System.out.printf(";;;%s%n", result);
     return result;
   }
   // +********************************************************************
@@ -236,11 +236,14 @@ public class BKTree<V> implements Dictionary<V, Integer> {
       List<ResultElem<String, Integer>> l = t.lookup(argv[i]);
       sum = sum + l.size();
       if( i % 1000 == 0 ) System.out.println(i);
-      /**********************************************************************
-       * System.out.printf("%s -->", argv[i]); for(ResultElem<String,
-       * Integer> e : l) { System.out.printf(" %s", e); }
-       * System.out.println();
-       */
+      
+      /* * /
+      System.out.printf("%s -->", argv[i]);
+      for(ResultElem<String, Integer> e : l) {
+        System.out.printf(" %s", e);
+      }
+      System.out.println();
+      /* */
     }
     long end = System.currentTimeMillis();
     double avg = ((double) (end - start)) / (double) (argv.length - 1);
