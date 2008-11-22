@@ -43,9 +43,9 @@ public class TestDictionary {
       }
       for(String term : ttt) {
         List<ResultElem<String,Integer>> l = d.lookup(term);
-        assertEquals("on "+name, 1, l.size());
-        assertEquals("on "+name, 0, l.get(0).d);
-        assertEquals("on "+name, term, l.get(0).value);
+        assertEquals(name, 1, l.size());
+        assertEquals(name, 0, l.get(0).d);
+        assertEquals(name, term, l.get(0).value);
       }
     }
   }
