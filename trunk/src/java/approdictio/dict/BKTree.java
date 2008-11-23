@@ -15,7 +15,6 @@ package approdictio.dict;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
 

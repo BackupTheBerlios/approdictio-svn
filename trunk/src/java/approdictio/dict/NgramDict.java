@@ -77,15 +77,9 @@ public class NgramDict implements Dictionary<String, Integer> {
     this.maxDist = maxDist;
   }
   /* +***************************************************************** */
-  /**
-   * <p>
-   * adds the {@code value} to the dictionary.
-   * </p>
-   */
   public void add(String value) {
-    Set<String> ngrams = ngrams(value);
 
-    for(String ngram : ngrams) {
+    for(String ngram : ngrams(value)) {
       Set<String> values = index.get(ngram);
       if( values==null ) {
         index.put(ngram, values = new HashSet<String>());
@@ -117,9 +111,10 @@ public class NgramDict implements Dictionary<String, Integer> {
   /* +***************************************************************** */
   /**
    * <p>
-   * looks up elements in the dictionary according to ngram-metric. Ngram
-   * metric for terms p and q and respective ngram-sets P and Q is computed
-   * as |union(P,Q)|-|intersection(P,Q)|. This is indeed a metric.
+   * looks up elements in the dictionary according to ngram metric. Ngram
+   * metric for terms p and q is computed based on their respective ngram
+   * sets P and Q as |union(P,Q)|-|intersection(P,Q)|. This is indeed a
+   * metric.
    * </p>
    * 
    * @see <a
@@ -128,8 +123,7 @@ public class NgramDict implements Dictionary<String, Integer> {
    */
   private List<ResultElem<String, Integer>> ngramSimilar(String queryValue) {
 
-    List<ResultElem<String, Integer>> result =
-        new ArrayList<ResultElem<String, Integer>>();
+    List<ResultElem<String, Integer>> result = newResultList(0);
 
     Set<String> queryNgrams = ngrams(queryValue);
 
@@ -147,28 +141,26 @@ public class NgramDict implements Dictionary<String, Integer> {
         termsSeen.add(termFound);
 
         int symDist = symmetricDistance(queryNgrams, ngrams(termFound));
-        // System.out.printf("d(%s,%s)=%d(%d) || (%s - %s)%n", queryValue,
-        // termFound, symDist, minDistSeen,
-        // queryNgrams, ngrams(termFound));
 
         // drop bad candidates as early as possible
         if( !eligible(symDist, minDistSeen) ) continue;
+
         if( symDist<minDistSeen ) minDistSeen = symDist;
-        result.add(new ResultElem<String, Integer>(termFound, symDist));
+        result.add(newResultElem(termFound, symDist));
         // System.out.printf("++++ added %s%n", termFound);
       }
     }
-    result = keepEligible(result, minDistSeen);
+    result = filterEligible(result, minDistSeen);
 
     return result;
   }
   /* +***************************************************************** */
-  private List<ResultElem<String, Integer>> keepEligible(
-                                                         List<ResultElem<String, Integer>> candidates,
-                                                         int minDistSeen)
+  private List<ResultElem<String, Integer>> 
+          filterEligible(List<ResultElem<String, Integer>> candidates,
+                         int minDistSeen)
   {
     List<ResultElem<String, Integer>> result =
-        new ArrayList<ResultElem<String, Integer>>(candidates.size());
+        newResultList(candidates.size());
 
     for(ResultElem<String, Integer> cand : candidates) {
       if( eligible(cand.d, minDistSeen) ) result.add(cand);
@@ -177,7 +169,8 @@ public class NgramDict implements Dictionary<String, Integer> {
   }
   /* +***************************************************************** */
   private boolean eligible(int candidateDistance, int bestDistance) {
-    // TODO: can this be optimized to use a smaller margin than ngramLen?
+    // TODO: can this be optimized to use a smaller margin than ngramLen? No,
+    // it is not obvious why ngramLen is a good choice, but it works.
     return candidateDistance-ngramLen<=bestDistance;
   }
   /* +***************************************************************** */
@@ -190,8 +183,12 @@ public class NgramDict implements Dictionary<String, Integer> {
   }
   /* +***************************************************************** */
   public List<ResultElem<String, Integer>> lookup(String queryValue) {
-    List<ResultElem<String, Integer>> tmp = ngramSimilar(queryValue);
 
+    List<ResultElem<String, Integer>> tmp = ngramSimilar(queryValue);
+    List<ResultElem<String, Integer>> result = newResultList(0);
+    for(ResultElem<String, Integer> re : curate(queryValue, tmp))
+      result.add(re);
+    // return result;
     return curate(queryValue, tmp);
   }
   /* +***************************************************************** */
@@ -216,12 +213,11 @@ public class NgramDict implements Dictionary<String, Integer> {
    *         trigram similarities and is sorted in ascending order of the
    *         metric distance values.
    */
-  private List<ResultElem<String, Integer>> curate(
-                                                   String query,
-                                                   List<ResultElem<String, Integer>> candidates)
+  private List<ResultElem<String, Integer>> 
+          curate(String query, List<ResultElem<String, Integer>> candidates)
   {
     List<ResultElem<String, Integer>> result =
-        new ArrayList<ResultElem<String, Integer>>(1+candidates.size()/2);
+        newResultList(1+candidates.size()/2);
 
     int minDistSeen = Integer.MAX_VALUE;
 
@@ -232,23 +228,39 @@ public class NgramDict implements Dictionary<String, Integer> {
       if( d>maxDist||d>minDistSeen ) continue;
 
       minDistSeen = d;
-      result.add(new ResultElem<String, Integer>(re.value, d));
+      result.add(newResultElem(re.value, d));
     }
 
     return filterBest(result, minDistSeen);
   }
   /* +***************************************************************** */
-  private List<ResultElem<String, Integer>> filterBest(
-                                                     List<ResultElem<String, Integer>> candidates,
-                                                     int bestDist)
+  private List<ResultElem<String, Integer>> 
+          filterBest(List<ResultElem<String, Integer>> candidates,
+                     int bestDist)
   {
     List<ResultElem<String, Integer>> result =
-        new ArrayList<ResultElem<String, Integer>>(candidates.size());
+        newResultList(candidates.size());
 
     for(ResultElem<String, Integer> cand : candidates) {
-      if( cand.d==bestDist) result.add(cand);
+      if( cand.d==bestDist ) result.add(cand);
     }
     return result;
+  }
+  /* +***************************************************************** */
+  private static final ResultElem<String, Integer> 
+          newResultElem(String value, Integer dist)
+  {
+    return new ResultElem<String, Integer>(value, dist);
+  }
+  /* +***************************************************************** */
+  private static final List<ResultElem<String, Integer>> 
+          newResultList(int size)
+  {
+    if( size==0 ) {
+      return new ArrayList<ResultElem<String, Integer>>();
+    } else {
+      return new ArrayList<ResultElem<String, Integer>>(size);
+    }
   }
   /* +***************************************************************** */
   /**

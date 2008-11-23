@@ -29,6 +29,11 @@ public class ResultElem<T, DTYPE> {
   public final DTYPE d;
 
   /* +***************************************************************** */
+  ResultElem(T value, DTYPE d) {
+    this.value = value;
+    this.d = d;
+  }
+  /*+******************************************************************/
   public static final Comparator<ResultElem<?, Integer>> cmpResult =
     new Comparator<ResultElem<?, Integer>>() {
     public int compare(ResultElem<?, Integer> arg0,
@@ -48,11 +53,6 @@ public class ResultElem<T, DTYPE> {
     }
   };
   /* +***************************************************************** */
-  ResultElem(T value, DTYPE d) {
-    this.value = value;
-    this.d = d;
-  }
-  /*+******************************************************************/
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(value).append(':').append(d);
