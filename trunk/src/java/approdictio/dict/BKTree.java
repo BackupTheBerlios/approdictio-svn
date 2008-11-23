@@ -14,7 +14,6 @@
 package approdictio.dict;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 
@@ -136,7 +135,6 @@ public class BKTree<V> implements Dictionary<V, Integer> {
       }
     }
   }
-
   // +********************************************************************
   private void add(BKNode<V> node, V token) {
     int d = metric.d(node.getValue(), token);
@@ -175,21 +173,24 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   // return null;
   // }
   // +********************************************************************
-  private void lookup(BKNode<V> node, List<ResultElem<V, Integer>> result,
-                      V value, int maxDist)
+  private int lookup(BKNode<V> node, List<ResultElem<V, Integer>> result,
+                     V value, int maxDist)
   {
+    int bestDist = Integer.MAX_VALUE;
     int d = metric.d(node.getValue(), value);
     if( d <= maxDist ) {
       result.add(new ResultElem<V, Integer>(node.getValue(), d));
+      if( d<bestDist ) bestDist = d;
     }
-    int from = d - maxDist;
-    if( from < 0 ) from = 0;
+    int from = Math.max(d - maxDist, 0);
     int to = d + maxDist;
     for(int i = from; i <= to; i++) {
       BKNode<V> child = node.get(i);
       if( child == null ) continue;
-      lookup(child, result, value, maxDist);
+      int childrenBestDist = lookup(child, result, value, maxDist);
+      if( childrenBestDist<bestDist ) bestDist = childrenBestDist;
     }
+    return bestDist;
   }
   // +********************************************************************
   /**
@@ -202,18 +203,19 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   public List<ResultElem<V, Integer>> lookup(V queryValue) {
     List<ResultElem<V, Integer>> result =
         new ArrayList<ResultElem<V, Integer>>();
-    lookup(root, result, queryValue, maxDist);
+    int bestDist = lookup(root, result, queryValue, maxDist);
     if( result.size() == 0 ) return result;
 
-    Collections.sort(result, ResultElem.cmpResult);
-    // System.out.printf("...%s%n", result);
-    // leave over only the closest elements
-    int best = result.get(0).d;
-    int l = 1;
-    while( l < result.size() && result.get(l).d == best )
-      l += 1;
-    result = result.subList(0, l);
-    // System.out.printf(";;;%s%n", result);
+    return filterBest(result, bestDist);
+  }
+  /* +***************************************************************** */
+  private List<ResultElem<V, Integer>> filterBest(List<ResultElem<V, Integer>> candidates,
+                                                  int bestDist) {
+    List<ResultElem<V, Integer>> result = 
+      new ArrayList<ResultElem<V, Integer>>(candidates.size());
+    for(ResultElem<V,Integer> cand : candidates) {
+      if( cand.d==bestDist ) result.add(cand);
+    }
     return result;
   }
   // +********************************************************************
