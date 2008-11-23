@@ -15,7 +15,7 @@ package approdictio.dict;
 
 /**
  * <p>
- * Defines a function to compute an integer valued metric.
+ * defines a function to compute an integer valued metric.
  * </p>
  * 
  * @author harald

@@ -26,7 +26,7 @@ import static approdictio.dict.Util.*;
 
 /**
  * <p>
- * a dictionary for fast approximate lookup words. This implementation uses
+ * a dictionary for fast approximate lookup of words. This implementation uses
  * n-gram indexing to retrieve candidate words.
  * </p>
  * <p>

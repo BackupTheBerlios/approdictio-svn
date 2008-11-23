@@ -21,26 +21,24 @@ import approdictio.levenshtein.LevenshteinMetric;
 
 /**
  * <p>
- * An dicionary implementation using <em>Burkhard Keller Tree</em>s. This
- * data structure allows to store objects of a class <T> such that
- * approximate retrieval is efficient. A necessary condition is, that on
- * class T a metric can be defined and provided as an implemenationn of
- * {@link IntMetric}.
+ * a dictionary implementation using <em>Burkhard Keller Tree</em>s.
+ * Burkhard Keller Trees store objects of type {@code T} for efficient
+ * retrieval of approximately equal objects. Approximate equality is defined
+ * by an {@link IntMetric} defined on {@code T}.
  * <p>
  * <p>
- * In a typical use case of this class, you first {@link #add(Object) add()}
- * values to the tree. Then call {@link #lookup(Object) lookup(query)} to
- * find stored values that are at most {@code d} away from your {@code query},
- * where {@code d} is the maximum distance specified in the constructor.
+ * In a typical use case, first  elements are {@link #add(Object) add}ed
+ * to the tree. Then {@link #lookup(Object) lookup(query)}
+ * finds values that are at most {@code maxDist} away from your {@code query},
+ * where {@code maxDist} is the maximum distance specified in the constructor.
  * </p>
  * 
  * <p>
  * There is currently no way to delete values from the tree.
  * </p>
  * 
- * @param <V> denotes the type of objects to be stored in teh tree. To use
- *        the BKTree, additionally a metric {@link IntMetric} must be defined
- *        on {@code T}
+ * @param <V> the type of objects to be stored in the tree. To use the
+ *        BKTree, a metric {@link IntMetric} must be defined on {@code T}.
  * 
  * @author harald
  * 

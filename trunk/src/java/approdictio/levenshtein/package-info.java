@@ -13,7 +13,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 /**
- * <p>provides an implementation of the Levensthein metric with
+ * <p>Levensthein metric with
  * customizable cost functions.</p>
  * @see <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">English Wikipedia on the Levenshtein distance</a>
  */

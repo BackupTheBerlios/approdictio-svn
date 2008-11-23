@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +31,7 @@ import static approdictio.dict.Util.*;
  * {@link Dictionary}. In addition to similarity lookup &mdash or rather
  * distance based approximate lookup &mdash; the list of equal distance
  * results is further weighted and sorted according to a weight available for
- * each dictionary term. Typically, the weights can be frequencies of the
+ * each dictionary term. The weights can be frequencies of the
  * term occuring in a corpus.
  * </p>
  * <p>
@@ -85,7 +83,7 @@ public class Didyoumean {
   /**
    * <p>
    * adds a term together with its assigned weight. Higher weights are
-   * better. Typically the weight can be the frequency of a term in a corpus.
+   * better. The weight can be the frequency of a term in a corpus.
    * If the term being added exists already in the dictionary, the given
    * {@code weight} is added to the weight already stored.
    * </p>
@@ -106,7 +104,7 @@ public class Didyoumean {
    * feeds the {@code Didyoumean} with terms and weights from a file. The
    * file format is line based. Each line must contain the term, the
    * separator character provided and an integer weight. Both, term and
-   * weight, are trimmed before used respectively parsed.
+   * weight, are trimmed before use.
    * </p>
    * 
    * @param fname is the file to read
@@ -136,7 +134,7 @@ public class Didyoumean {
    * feeds {@code Didyoumean} with terms and weights from a {@code Reader}.
    * This method works exactly like the three parameter method
    * {@link #addFile(String,char,String) addFile}, except that it is up to
-   * the caller to provide alrady a {@code Reader}.
+   * the caller to provide a {@code Reader}.
    * </p>
    */
   public void addFile(Reader in, char separator) throws IOException,
@@ -191,7 +189,7 @@ public class Didyoumean {
    * <p>
    * looks up the word in the internal {@link Dictionary} and then filters
    * for the term with the heighest weight according to the weights provied
-   * when {@link #add add()}ing a term.
+   * when {@link #add add}ing a term.
    * </p>
    * 
    * @return the list of stored elements most similar to {@code word} that
@@ -231,7 +229,7 @@ public class Didyoumean {
   /* +***************************************************************** */
   /**
    * <p>
-   * mainly to support inspection an debugging, the class (not the object) of
+   * to support inspection and debugging, the class (not the object) of
    * the internally used {@link Dictionary} is returned.
    * </p>
    */
