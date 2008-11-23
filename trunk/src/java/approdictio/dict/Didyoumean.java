@@ -162,12 +162,16 @@ public class Didyoumean {
   private static void checkLineFormat(String[] pair, int lineNo)
     throws FileFormatException
   {
-    if( pair.length!=2 ) throwFormatException(lineNo);
+    if( pair.length!=2 ) {
+      String msg = "line does not have 2 elements";
+      throw new FileFormatException(msg, lineNo);
+    }
 
     pair[0] = pair[0].trim();
     pair[1] = pair[1].trim();
-    if( pair[0].length()==0 || pair[1].length()==0 ) {
-      throwFormatException(lineNo);
+    if( pair[0].length()==0||pair[1].length()==0 ) {
+      String msg = "line contains empty element";
+      throw new FileFormatException(msg, lineNo);
     }
   }
   /* +***************************************************************** */
@@ -177,17 +181,10 @@ public class Didyoumean {
     try {
       return Integer.parseInt(weight);
     } catch( NumberFormatException e ) {
-      throw new FileFormatException(""+lineNo
-          +": cannot find the format `text:int'", lineNo);
+      String msg = String.format("cannot convert %s to int", weight);
+      throw new FileFormatException(msg, lineNo);
     }
 
-  }
-  /* +***************************************************************** */
-  private static void throwFormatException(int lineNo)
-    throws FileFormatException
-  {
-    throw new FileFormatException(""+lineNo
-        +": cannot find the format `text:int'", lineNo);
   }
   /* +***************************************************************** */
   /**

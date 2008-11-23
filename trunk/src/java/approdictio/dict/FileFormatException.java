@@ -8,7 +8,7 @@ package approdictio.dict;
 public class FileFormatException extends Exception {
   private final int lineNo;
   public FileFormatException(String msg, int lineNo) {
-    super(msg);
+    super(String.format("%d: %s", lineNo, msg));
     this.lineNo = lineNo;
   }
   /**

@@ -95,7 +95,8 @@ public class TestDidyoumean {
       "x:1\n" + "hahaha\n" + "y:2\n",
       "x:1\n :2\n a:3\n",
       "x:1\n adsf:\n a:1\n",
-      "x:1\n asdf:bla\n b:1"
+      "x:1\n asdf:bla\n b:1",
+      "x:1\n aa:1:aa\n b:1",
     };
 
     for(Didyoumean dym : dyms) {
@@ -114,7 +115,6 @@ public class TestDidyoumean {
       }
     }
   }
-  /*+******************************************************************/
   /*+******************************************************************/
 
 }
