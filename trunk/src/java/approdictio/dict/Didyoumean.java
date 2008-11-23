@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import approdictio.levenshtein.CostFunctions;
 import approdictio.levenshtein.LevenshteinMetric;
-
+import static approdictio.dict.Util.*;
 /**
  * <p>
  * is an implementation of a <em>did you mean</em> based on a
@@ -86,6 +86,8 @@ public class Didyoumean {
    * <p>
    * adds a term together with its assigned weight. Higher weights are
    * better. Typically the weight can be the frequency of a term in a corpus.
+   * If the term being added exists already in the dictionary, the given
+   * {@code weight} is added to the weight already stored.
    * </p>
    */
   public void add(String term, int weight) {
@@ -149,29 +151,43 @@ public class Didyoumean {
     int lcount = 0;
     while( null != (line = bin.readLine()) ) {
       lcount += 1;
-      String[] p = line.split(splitRe);
-
-      if( p.length != 2 ) {
-        throw new FileFormatException("" + lcount
-            + ": cannot find the format `text:int'", lcount);
-      }
-
-      p[0] = p[0].trim();
-      p[1] = p[1].trim();
-      if( p[0].length() == 0 || p[1].length() == 0 ) {
-        throw new FileFormatException("" + lcount
-            + ": cannot find the format `text:int'", lcount);
-      }
-
-      int weight = 0;
-      try {
-        weight = Integer.parseInt(p[1]);
-      } catch( NumberFormatException e ) {
-        throw new FileFormatException("" + lcount
-            + ": cannot find the format `text:int'", lcount);
-      }
-      add(p[0], weight);
+      String[] pair = line.split(splitRe);
+      checkLineFormat(pair, lcount);
+      
+      int weight = convertWeight(pair[1], lcount);
+      add(pair[0], weight);
     }
+  }
+  /* +***************************************************************** */
+  private static void checkLineFormat(String[] pair, int lineNo)
+    throws FileFormatException
+  {
+    if( pair.length!=2 ) throwFormatException(lineNo);
+
+    pair[0] = pair[0].trim();
+    pair[1] = pair[1].trim();
+    if( pair[0].length()==0 || pair[1].length()==0 ) {
+      throwFormatException(lineNo);
+    }
+  }
+  /* +***************************************************************** */
+  private static int convertWeight(String weight, int lineNo)
+    throws FileFormatException
+  {
+    try {
+      return Integer.parseInt(weight);
+    } catch( NumberFormatException e ) {
+      throw new FileFormatException(""+lineNo
+          +": cannot find the format `text:int'", lineNo);
+    }
+
+  }
+  /* +***************************************************************** */
+  private static void throwFormatException(int lineNo)
+    throws FileFormatException
+  {
+    throw new FileFormatException(""+lineNo
+        +": cannot find the format `text:int'", lineNo);
   }
   /* +***************************************************************** */
   /**
@@ -185,23 +201,34 @@ public class Didyoumean {
    *         have the highest weight assigned.
    */
   public List<ResultElem<String, Integer>> lookup(String word) {
-    List<ResultElem<String, Integer>> tmp = dict.lookup(word);
-    // System.out.printf("%s%n", tmp);
-    List<ResultElem<String, Integer>> result =
-        new ArrayList<ResultElem<String, Integer>>();
+    List<ResultElem<String, Integer>> result = newResultList(0);
 
-    for(ResultElem<String, Integer> e : tmp) {
-      ResultElem<String, Integer> newElem =
-          new ResultElem<String, Integer>(e.value, weights.get(e.value));
-      result.add(newElem);
+    int bestWeight = convertToWeights(dict.lookup(word), result);
+
+    return filterBest(result, bestWeight);
+  }
+  /* +***************************************************************** */
+  private int convertToWeights(List<ResultElem<String, Integer>> in,
+                               List<ResultElem<String, Integer>> out) {
+    int bestWeight = Integer.MIN_VALUE;
+    
+    for(ResultElem<String, Integer> e : in) {
+      int weight = weights.get(e.value);
+      if( weight>bestWeight ) bestWeight = weight;
+      ResultElem<String, Integer> newElem = newResultElem(e.value, weight);
+      out.add(newElem);
     }
-    Collections.sort(result, ResultElem.cmpResultInv);
-    if( result.size() <= 1 ) return result;
-    int i = 1;
-    int d = result.get(0).d;
-    while( i < result.size() && result.get(i).d == d )
-      i += 1;
-    if( i < result.size() ) result = result.subList(0, i);
+    return bestWeight;
+  }
+  /* +***************************************************************** */
+  private static List<ResultElem<String, Integer>> filterBest(
+                                                              List<ResultElem<String, Integer>> candidates,
+                                                              int bestWeight)
+  {
+    List<ResultElem<String, Integer>> result = newResultList(0);
+    for(ResultElem<String,Integer> elem : candidates) {
+      if( elem.d==bestWeight ) result.add(elem);
+    }
     return result;
   }
   /* +***************************************************************** */

@@ -13,7 +13,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 package approdictio.dict;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +22,7 @@ import java.util.Set;
 
 import approdictio.levenshtein.CostFunctions;
 import approdictio.levenshtein.LevenshteinMetric;
+import static approdictio.dict.Util.*;
 
 /**
  * <p>
@@ -245,22 +245,6 @@ public class NgramDict implements Dictionary<String, Integer> {
       if( cand.d==bestDist ) result.add(cand);
     }
     return result;
-  }
-  /* +***************************************************************** */
-  private static final ResultElem<String, Integer> 
-          newResultElem(String value, Integer dist)
-  {
-    return new ResultElem<String, Integer>(value, dist);
-  }
-  /* +***************************************************************** */
-  private static final List<ResultElem<String, Integer>> 
-          newResultList(int size)
-  {
-    if( size==0 ) {
-      return new ArrayList<ResultElem<String, Integer>>();
-    } else {
-      return new ArrayList<ResultElem<String, Integer>>(size);
-    }
   }
   /* +***************************************************************** */
   /**

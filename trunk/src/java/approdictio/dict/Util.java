@@ -16,6 +16,8 @@ package approdictio.dict;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -24,6 +26,20 @@ import java.io.IOException;
  */
 public class Util {
   private Util() {
+  }
+  /* +***************************************************************** */
+  public static ResultElem<String, Integer> newResultElem(String value,
+                                                          Integer dist)
+  {
+    return new ResultElem<String, Integer>(value, dist);
+  }
+  /* +***************************************************************** */
+  public static List<ResultElem<String, Integer>> newResultList(int size) {
+    if( size==0 ) {
+      return new ArrayList<ResultElem<String, Integer>>();
+    } else {
+      return new ArrayList<ResultElem<String, Integer>>(size);
+    }
   }
   /* +***************************************************************** */
   /**
@@ -45,9 +61,9 @@ public class Util {
     String line;
     int i = 0;
     try {
-      while( null != (line = in.readLine()) ) {
+      while( null!=(line = in.readLine()) ) {
         line = line.trim();
-        if( line.length() == 0 ) continue;
+        if( line.length()==0 ) continue;
         dict.add(line);
         i += 1;
         // if( i%1000==0 ) {System.out.print('.'); System.out.flush();}
