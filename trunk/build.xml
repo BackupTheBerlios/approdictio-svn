@@ -10,13 +10,14 @@
     <javac srcdir="src/java"
       destdir="Classes"
       source="1.5"
-      listfiles="no"
+      listfiles="yes"
       fork="false"
       debug="true"
       deprecation="true"
       >
       <compilerarg value="-Xlint:unchecked"/>
-      <patternset includes="approdictio/**/*.java" />
+      <patternset includes="approdictio/**/*.java"
+	excludes="**/package-info.java"/>
     </javac>
   </target>
 
@@ -35,10 +36,11 @@
     </javadoc>
   </target> 
   
-  <target name="jar" depends="compile, svnrevision">
+  <target name="jar" depends="cleanClasses, compile, svnrevision">
     <mkdir dir="dist"/>
     <jar destfile="dist/Approdictio-${svn.revision}.jar" basedir="Classes"
-      includes="**/*.class">
+      includes="**/*.class"
+      excludes="**/Test*.class">
       <manifest>
 	<attribute name="svn-revision" value="${svn.revision}" />
 	<attribute name="timestamp" value="${time.now}" />
@@ -46,15 +48,18 @@
     </jar>
   </target>
 
-  <target name="docjar" depends="javadoc">
+  <target name="docjar" depends="cleanDoc, javadoc">
     <mkdir dir="dist"/>
     <zip destfile="dist/ApprodictioDoc-${svn.revision}.zip"
       basedir="dist" includes="ApprodictioDoc/**">
     </zip>
   </target>
 
-  <target name="jars" depends="jar, docjar"
-    description="prepare jars for publishing on berlios" />
+  <target name="upload" depends="jar, docjar"
+    description="upload jars for publishing to berlios">
+    <upload file="dist/Approdictio-${svn.revision}.jar"/>
+    <upload file="dist/ApprodictioDoc-${svn.revision}.zip"/>
+  </target>
 
   <target name="homepage" 
     description="publish the homepage to berlios"
@@ -77,6 +82,13 @@
       <arg value="dist/covereport/" />
       <arg value="pifpafpuf@shell.berlios.de:approdictio/htdocs/covereport" />
     </exec>
+  </target>
+
+  <target name="cleanClasses">
+    <delete dir="Classes/approdictio" />
+  </target>
+  <target name="cleanDoc">
+    <delete dir="dist/ApprodictioDoc"/>
   </target>
 
   <target name="compiletests">
@@ -175,6 +187,15 @@
   <tstamp>
     <format property="time.now" pattern="yyyy-MM-dd hh:mm:ss"/>
   </tstamp>
+
+  <macrodef name="upload" description="upload to berlios incoming dir">
+    <attribute name="file"/>
+    <sequential>
+      <exec executable="lftp" inputstring="cd incoming;put @{file}">
+	<arg line="-u anonymous,pifpafpuf@gmx.de ftp.berlios.de"/>
+      </exec>
+    </sequential>
+  </macrodef>
 
   <target name="e">
     <echoproperties/>
