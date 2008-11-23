@@ -53,9 +53,12 @@
     </zip>
   </target>
 
+  <target name="jars" depends="jar, docjar"
+    description="prepare jars for publishing on berlios" />
+
   <target name="homepage" 
     description="publish the homepage to berlios"
-    depends="javadoc">
+    depends="javadoc, coverage">
     <exec executable="scp">
       <arg value="files/index.html"/>
       <arg value="files/index.css"/>
