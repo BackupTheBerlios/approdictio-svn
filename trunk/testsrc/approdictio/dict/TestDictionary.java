@@ -173,6 +173,17 @@ public class TestDictionary {
     }
   }
   /*+******************************************************************/
+  @Test
+  public void addSameWord() {
+    for(Dictionary<String,Integer> dict : dicts) {
+      String name = dict.getClass().getName();
+      dict.add("blabla");
+      dict.add("blabla");
+      List<ResultElem<String,Integer>> l = dict.lookup("blabla");
+      assertEquals(name, 1, l.size());
+    }    
+  }
+  /*+******************************************************************/
 
 
 }

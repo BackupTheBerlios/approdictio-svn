@@ -136,6 +136,8 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   // +********************************************************************
   private void add(BKNode<V> node, V token) {
     int d = metric.d(node.getValue(), token);
+    if( d==0 ) return;
+    
     BKNode<V> child = node.get(d);
     if( child == null ) {
       node.set(d, new BKNode<V>(token));
@@ -156,7 +158,9 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   // +********************************************************************
   /**
    * <p>
-   * adds the value to the tree.
+   * adds the value to the tree. If the {@code value} has a distance of zero
+   * to an already stored value, according to our metric, the value is not
+   * stored again.
    * </p>
    */
   public void add(V value) {
@@ -166,10 +170,6 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     }
     add(root, value);
   }
-  // +********************************************************************
-  // public String nearest(String queryToken) {
-  // return null;
-  // }
   // +********************************************************************
   private int lookup(BKNode<V> node, List<ResultElem<V, Integer>> result,
                      V value, int maxDist)
