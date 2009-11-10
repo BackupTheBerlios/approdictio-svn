@@ -201,6 +201,9 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   public List<ResultElem<V, Integer>> lookup(V queryValue) {
     List<ResultElem<V, Integer>> result =
         new ArrayList<ResultElem<V, Integer>>();
+
+    if( root==null ) return result; 
+
     int bestDist = lookup(root, result, queryValue, maxDist);
     if( result.size() == 0 ) return result;
 
