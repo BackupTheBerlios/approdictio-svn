@@ -20,13 +20,13 @@ import java.util.List;
  * defines a dictionary for approximate lookup. The underlying assumption is
  * that values of the parameter type {@code T} can be compared and their similarity
  * described by a numerical value of type {@code DTYPE}. This interface does
- * not define wether {@code DTYPE} describes a distance measure or even a
+ * not define whether {@code DTYPE} describes a distance measure or even a
  * metric or whether it describes a similarity weight, where large values
  * denote higher similarity.
  * </p>
  * 
  * @param <T> the type of values stored in the dictionary
- * @param <DTYPE> the type of values of the similarity measure, most
+ * @param <DTYPE> the type of values of the similarity measure, usually
  *        some numeric type.
  */
 public interface Dictionary<T, DTYPE> {
