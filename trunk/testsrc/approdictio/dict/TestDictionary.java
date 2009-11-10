@@ -2,9 +2,7 @@ package approdictio.dict;
 
 import static org.junit.Assert.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 import org.junit.Before;
@@ -15,6 +13,7 @@ import approdictio.levenshtein.LevenshteinMetric;
 
 public class TestDictionary {
   private Dictionary<String,Integer>[] dicts;
+  private Random random = null;
   
   @Before
   public void setup() {
@@ -26,6 +25,8 @@ public class TestDictionary {
     dicts = ds;
     dicts[0] =  new BKTree<String>(lev, 2);
     dicts[1] = new NgramDict(3, lev, 3);
+    
+    random = new Random(1);
   }
 
   /*+******************************************************************/
@@ -99,6 +100,76 @@ public class TestDictionary {
       l = d.lookup("00000a00000bbbbbbbbbc");
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[2], l.get(0).value);
+    }
+  }
+  /*+******************************************************************/
+  @Test
+  public void lookupOnEmptyDict() throws Exception {
+    for(Dictionary<String,Integer> dict : dicts) {
+      dict.lookup("abc");
+    }
+  }
+  /*+******************************************************************/
+  private char randomChar() {
+    return (char)('a' + random.nextInt(6));
+  }
+  private String randomWord(int minLen, int range) {
+    int len = minLen + random.nextInt(range);
+    StringBuilder b = new StringBuilder();
+    for(int i=0; i<len; i++) {
+      b.append(randomChar());
+    }
+    return b.toString();
+  }
+  /*+******************************************************************/
+  private static final class DictFiller implements Runnable {
+    private final Dictionary<String,Integer> dict;
+    private final List<String> words;
+    private final Thread me;
+    public DictFiller(Dictionary<String,Integer> dict, List<String> words) {
+      this.dict = dict;
+      this.words = words;
+      me = new Thread(this);
+      me.start();
+    }
+    public void join() throws InterruptedException {
+      me.join();
+      System.out.println("just joined");
+    }
+    public void run() {
+      System.out.printf("starting%n");
+
+      for(String word : words) {
+        dict.add(word);
+      }
+      System.out.printf("done%n");
+    }
+  }
+  /*+******************************************************************/
+  //@Test ------ This does not work as a test, except very seldomly
+  public void concurrentModification() throws InterruptedException {
+    int numWords = 150000;
+    List<String> words = new ArrayList<String>(numWords);
+    for(int i=0; i<numWords; i++) {
+      words.add(randomWord(3,7));
+    }
+    for(Dictionary<String,Integer> dict : dicts) {
+      DictFiller filler = new DictFiller(dict, words);
+      Exception e = null;
+      int count = -1;
+      for(int i=0; i<2*numWords; i++) {
+        try {
+          dict.lookup("abcdeffedcbafcabaceefaaabbbcccdddeeefff");
+          count = i;
+        } catch( ConcurrentModificationException ce) {
+          e = ce;
+          System.out.printf("---------------%n");
+          break;
+        }
+      }
+      System.out.printf("count = %d; e=%s%n", count, e);
+      filler.join();
+      assertTrue(e instanceof ConcurrentModificationException );
     }
   }
   /*+******************************************************************/
