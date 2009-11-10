@@ -182,7 +182,12 @@ public class NgramDict implements Dictionary<String, Integer> {
     return union.size()-scratch.size();
   }
   /* +***************************************************************** */
-  public List<ResultElem<String, Integer>> lookup(String queryValue) {
+  /**
+   * @throws ConcurrentModificationException may be thrown in cases where the
+   *         dictionary is updated while a lookup tries to find a query
+   *         value.
+   */
+  public List<ResultElem<String,Integer>> lookup(String queryValue) {
 
     List<ResultElem<String, Integer>> tmp = ngramSimilar(queryValue);
     List<ResultElem<String, Integer>> result = newResultList(0);
