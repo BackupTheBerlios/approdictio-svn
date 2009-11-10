@@ -38,7 +38,7 @@ import approdictio.levenshtein.LevenshteinMetric;
  * </p>
  * 
  * @param <V> the type of objects to be stored in the tree. To use the
- *        BKTree, a metric {@link IntMetric} must be defined on {@code T}.
+ *        BKTree, a metric {@link IntMetric} must be defined on {@code V}.
  * 
  * @author harald
  * 
