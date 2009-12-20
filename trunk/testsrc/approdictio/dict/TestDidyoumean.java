@@ -25,10 +25,10 @@ public class TestDidyoumean {
     dyms[1] = Didyoumean.instanceNgramDict(3, lev, 5);
   }
   /*+******************************************************************/
-  private static final class P {
+  private static final class WeightedTerm {
     public final String term;
     public final int w;
-    public P(String t, int w) {
+    public WeightedTerm(String t, int w) {
       this.term = t;
       this.w = w;
     }
@@ -36,18 +36,18 @@ public class TestDidyoumean {
   /*+******************************************************************/
   @Test 
   public void dymMinimal() {
-    P[] ttt = {
-        new P("a1bcde", 10),
-        new P("ab2cde", 11),
-        new P("abc3de", 11),
-        new P("abcd4e", 11),
+    WeightedTerm[] ttt = {
+        new WeightedTerm("a1bcde", 10),
+        new WeightedTerm("ab2cde", 11),
+        new WeightedTerm("abc3de", 11),
+        new WeightedTerm("abcd4e", 11),
         // the next to test if adding a term twice does the right thing
-        new P("fiffy", 2),
-        new P("fiffi", 2),
-        new P("fiffy", 2),
+        new WeightedTerm("fiffy", 2),
+        new WeightedTerm("fiffi", 2),
+        new WeightedTerm("fiffy", 2),
     };
     for(Didyoumean dym: dyms) {
-      for(P p: ttt) dym.add(p.term, p.w);
+      for(WeightedTerm p: ttt) dym.add(p.term, p.w);
       String name = dym.getDictClass().getName();
 
       List<ResultElem<String,Integer>> l = dym.lookup("abcde");
