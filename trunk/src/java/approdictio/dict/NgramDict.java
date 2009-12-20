@@ -191,9 +191,9 @@ public class NgramDict implements Dictionary<String, Integer> {
 
     List<ResultElem<String, Integer>> tmp = ngramSimilar(queryValue);
     List<ResultElem<String, Integer>> result = newResultList(0);
-    for(ResultElem<String, Integer> re : curate(queryValue, tmp))
+    for(ResultElem<String, Integer> re : curate(queryValue, tmp)) {
       result.add(re);
-    // return result;
+    }
     return curate(queryValue, tmp);
   }
   /* +***************************************************************** */
