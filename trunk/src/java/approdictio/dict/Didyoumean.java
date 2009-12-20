@@ -196,9 +196,31 @@ public class Didyoumean {
    *         have the highest weight assigned.
    */
   public List<ResultElem<String, Integer>> lookup(String word) {
-    List<ResultElem<String, Integer>> result = newResultList(0);
+    return lookup(word, false);
+  }
+  /* +***************************************************************** */
+  /**
+   * <p>
+   * like {@link #lookup lookup()} but never returns the {@code word} itself,
+   * even if it is in the dictionary.
+   * </p>
+   */
+  public List<ResultElem<String,Integer>> lookupDistinct(String word) {
+    return lookup(word, true);
+  }
+  /* +***************************************************************** */
+  private List<ResultElem<String,Integer>> lookup(String word,
+                                                 boolean distinct)
+  {
+    List<ResultElem<String,Integer>> result = newResultList();
 
-    int bestWeight = convertToWeights(dict.lookup(word), result);
+    List<ResultElem<String,Integer>> similarWords;
+    if( distinct ) {
+      similarWords = dict.lookupDistinct(word);
+    } else {
+      similarWords = dict.lookup(word);
+    }
+    int bestWeight = convertToWeights(similarWords, result);
 
     return filterBest(result, bestWeight);
   }
@@ -220,7 +242,7 @@ public class Didyoumean {
                                                               List<ResultElem<String, Integer>> candidates,
                                                               int bestWeight)
   {
-    List<ResultElem<String, Integer>> result = newResultList(0);
+    List<ResultElem<String, Integer>> result = newResultList();
     for(ResultElem<String,Integer> elem : candidates) {
       if( elem.d==bestWeight ) result.add(elem);
     }
@@ -233,7 +255,8 @@ public class Didyoumean {
    * the internally used {@link Dictionary} is returned.
    * </p>
    */
-  public Class<? extends Dictionary> getDictClass() {
+  public Class<?> getDictClass() {
+    dict.add("s");
     return dict.getClass();
   }
   /* +***************************************************************** */

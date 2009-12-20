@@ -10,6 +10,7 @@ import approdictio.levenshtein.LevenshteinMetric;
 
 
 public class TestLevenshtein {
+  @SuppressWarnings("unchecked")
   IntMetric[] tmp = {
       new LevenshteinMetric(),
       new LevenshteinMetric(CostFunctions.caseIgnore),

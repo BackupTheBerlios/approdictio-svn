@@ -12,7 +12,7 @@ import approdictio.levenshtein.LevenshteinMetric;
 
 
 public class TestDictionary {
-  private Dictionary<String,Integer>[] dicts;
+  private Dictionary<String,Integer>[] dicts = null;
   private Random random = null;
   
   @Before
@@ -31,7 +31,7 @@ public class TestDictionary {
 
   /*+******************************************************************/
   @Test
-  public void minimalRoundtrip() {
+  public void termItselfReturned() {
     String[] ttt = {
         "halligalli", "blarilu", "pispopeia", "dingens",
         "hallgalli", "blapilu", "pisopeia", "xdingens",
@@ -52,10 +52,31 @@ public class TestDictionary {
   }
   /*+******************************************************************/
   @Test
+  public void requestDistinctTerm() {
+    String[] dictTerm = {
+        "halligalli", "blarilu", "pispopeia", "dingens",        
+    };
+    for(Dictionary<String,Integer> d : dicts) {
+      String name = d.getClass().getName();
+      for(String term : dictTerm) {
+        d.add(term);
+        d.add(term+"x");
+      }
+      for(String term : dictTerm) {
+        List<ResultElem<String,Integer>> l = d.lookupDistinct(term);
+        assertEquals(name, 1, l.size());
+        assertEquals(name, 1, l.get(0).d);
+        assertEquals(name, term+"x", l.get(0).value);
+      }
+    }
+  }
+  /*+******************************************************************/
+  @Test
   public void zeroResults() {
     for(Dictionary<String,Integer> d : dicts) {
       d.add("aaaaa");
       assertEquals(0, d.lookup("zzzz").size());
+      assertEquals(0, d.lookupDistinct("zzzz").size());
     }    
   }
   /*+******************************************************************/
@@ -70,6 +91,10 @@ public class TestDictionary {
 
       List<ResultElem<String,Integer>> l = d.lookup("abcde");
       assertEquals(name, 2, l.size());
+
+      l = d.lookupDistinct("abcde");
+      assertEquals(name, 2, l.size());
+      
       Set<String> s = new HashSet<String>(2);
       s.add(ttt[0]);
       s.add(ttt[1]);
@@ -96,10 +121,18 @@ public class TestDictionary {
       List<ResultElem<String,Integer>> l = d.lookup("00000a00000bbbbbbbbbb");
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[2], l.get(0).value);
+
+      l = d.lookupDistinct("00000a00000bbbbbbbbbb");
+      assertEquals(name, 0, l.size());
       
       l = d.lookup("00000a00000bbbbbbbbbc");
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[2], l.get(0).value);
+
+      l = d.lookupDistinct("00000a00000bbbbbbbbbc");
+      assertEquals(name, 1, l.size());
+      assertEquals(name, ttt[2], l.get(0).value);
+
     }
   }
   /*+******************************************************************/
@@ -180,6 +213,9 @@ public class TestDictionary {
       dict.add("blabla");
       dict.add("blabla");
       List<ResultElem<String,Integer>> l = dict.lookup("blabla");
+      assertEquals(name, 1, l.size());
+
+      l = dict.lookupDistinct("blibla");
       assertEquals(name, 1, l.size());
     }    
   }

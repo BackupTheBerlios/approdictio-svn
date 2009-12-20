@@ -34,7 +34,7 @@ public class ResultElem<T, DTYPE> {
     this.d = d;
   }
   /*+******************************************************************/
-  public static final Comparator<ResultElem<?, Integer>> cmpResult =
+  static final Comparator<ResultElem<?, Integer>> cmpResult =
     new Comparator<ResultElem<?, Integer>>() {
     public int compare(ResultElem<?, Integer> arg0,
                        ResultElem<?, Integer> arg1)
@@ -44,7 +44,7 @@ public class ResultElem<T, DTYPE> {
   };
   
   /* +***************************************************************** */
-  public static final Comparator<ResultElem<?, Integer>> cmpResultInv =
+  static final Comparator<ResultElem<?, Integer>> cmpResultInv =
     new Comparator<ResultElem<?, Integer>>() {
     public int compare(ResultElem<?, Integer> arg0,
                        ResultElem<?, Integer> arg1)

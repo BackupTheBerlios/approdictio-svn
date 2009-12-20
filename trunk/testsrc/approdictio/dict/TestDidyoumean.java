@@ -56,6 +56,11 @@ public class TestDidyoumean {
       assertEquals(name, 11, l.get(1).d);
       assertEquals(name, 11, l.get(2).d);
 
+      l = dym.lookupDistinct("abcd4e");
+      assertEquals(name, 2, l.size());
+      assertEquals(name, 11, l.get(0).d);
+      assertEquals(name, 11, l.get(1).d);
+      
       l = dym.lookup("fiffa");
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[4].term, l.get(0).value);

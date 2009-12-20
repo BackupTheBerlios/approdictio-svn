@@ -127,7 +127,7 @@ public class BKTree<V> implements Dictionary<V, Integer> {
       f.format("%s%d: %s%n", indent, d, value);
       int l = links.size();
       for(int i = 0; i < l; i++) {
-        BKNode node = links.get(i);
+        BKNode<V> node = links.get(i);
         if( node == null ) continue;
         node.dump(out, i, "  " + indent);
       }
@@ -151,7 +151,7 @@ public class BKTree<V> implements Dictionary<V, Integer> {
    * for debugging only.
    * </p>
    */
-  public void dump(Appendable out) {
+  void dump(Appendable out) {
     if( root == null ) return;
     root.dump(out, -1, "");
   }
@@ -171,21 +171,23 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     add(root, value);
   }
   // +********************************************************************
-  private int lookup(BKNode<V> node, List<ResultElem<V, Integer>> result,
-                     V value, int maxDist)
+  private int lookup(BKNode<V> node, List<ResultElem<V,Integer>> result,
+                     V queryValue, int maxDist, boolean distinct)
   {
     int bestDist = Integer.MAX_VALUE;
-    int d = metric.d(node.getValue(), value);
-    if( d <= maxDist ) {
-      result.add(new ResultElem<V, Integer>(node.getValue(), d));
+    V value = node.getValue();
+    int d = metric.d(value, queryValue);
+    if( d<=maxDist && !(distinct && queryValue.equals(value)) ) {
+      result.add(new ResultElem<V,Integer>(value, d));
       if( d<bestDist ) bestDist = d;
     }
-    int from = Math.max(d - maxDist, 0);
-    int to = d + maxDist;
-    for(int i = from; i <= to; i++) {
+    int from = Math.max(d-maxDist, 0);
+    int to = d+maxDist;
+    for(int i = from; i<=to; i++) {
       BKNode<V> child = node.get(i);
-      if( child == null ) continue;
-      int childrenBestDist = lookup(child, result, value, maxDist);
+      if( child==null ) continue;
+      int childrenBestDist =
+          lookup(child, result, queryValue, maxDist, distinct);
       if( childrenBestDist<bestDist ) bestDist = childrenBestDist;
     }
     return bestDist;
@@ -199,17 +201,25 @@ public class BKTree<V> implements Dictionary<V, Integer> {
    * </p>
    */
   public List<ResultElem<V, Integer>> lookup(V queryValue) {
-    List<ResultElem<V, Integer>> result =
-        new ArrayList<ResultElem<V, Integer>>();
+    return lookup(queryValue, false);
+  }
+  /*+******************************************************************/
+  public List<ResultElem<V, Integer>> lookupDistinct(V queryValue) {
+    return lookup(queryValue, true);
+  }
+  /*+******************************************************************/
+  private List<ResultElem<V,Integer>> lookup(V queryValue, boolean distinct) {
+    List<ResultElem<V,Integer>> result =
+        new ArrayList<ResultElem<V,Integer>>();
 
-    if( root==null ) return result; 
+    if( root==null ) return result;
 
-    int bestDist = lookup(root, result, queryValue, maxDist);
-    if( result.size() == 0 ) return result;
+    int bestDist = lookup(root, result, queryValue, maxDist, distinct);
+    if( result.size()==0 ) return result;
 
     return filterBest(result, bestDist);
   }
-  /* +***************************************************************** */
+  /*+******************************************************************/
   private List<ResultElem<V, Integer>> filterBest(List<ResultElem<V, Integer>> candidates,
                                                   int bestDist) {
     List<ResultElem<V, Integer>> result = 

@@ -26,8 +26,8 @@ import static approdictio.dict.Util.*;
 
 /**
  * <p>
- * a dictionary for fast approximate lookup of words. This implementation uses
- * n-gram indexing to retrieve candidate words.
+ * a dictionary for fast approximate lookup of words. This implementation
+ * uses n-gram indexing to retrieve candidate words.
  * </p>
  * <p>
  * <b>Background:</b> When a term is added to the dictionary, all its
@@ -36,10 +36,22 @@ import static approdictio.dict.Util.*;
  * are again computed and used to retrieve candidate terms. Candidate terms
  * have at least one n-gram in common with the query term. Further the list
  * of candidates is trimmed by parameter {@code maxDist}. The ngram-metric
- * used is |union(P,Q)|-|intersection(P,Q)| for n-gram sets P and Q.
+ * used is
  * </p>
+ * <blockquote>
+ * |union(P,Q)| - |intersection(P,Q)| = |union(P,Q) \ intersection(P,Q)|
+ * </blockquote>
+ * <p>
+ * for n-gram sets P and Q, which is indeed a metric.
+ * </p>
+ * 
+ * @see <a
+ *      href="http://en.wikipedia.org/wiki/Symmetric_difference#Symmetric_difference_on_measure_spaces">Wikipedia
+ *      Symmetric Difference</a>
  */
-public class NgramDict implements Dictionary<String, Integer> {
+public class NgramDict
+    implements Dictionary<String,Integer>
+{
 
   private final int ngramLen;
 
@@ -50,8 +62,8 @@ public class NgramDict implements Dictionary<String, Integer> {
   private final int maxDist;
 
   // an index mapping ngrams to their strings.
-  private final Map<String, Set<String>> index =
-      new HashMap<String, Set<String>>();
+  private final Map<String,Set<String>> index =
+      new HashMap<String,Set<String>>();
   /* +***************************************************************** */
   /**
    * <p>
@@ -113,17 +125,15 @@ public class NgramDict implements Dictionary<String, Integer> {
    * <p>
    * looks up elements in the dictionary according to ngram metric. Ngram
    * metric for terms p and q is computed based on their respective ngram
-   * sets P and Q as |union(P,Q)|-|intersection(P,Q)|. This is indeed a
-   * metric.
+   * sets P and Q as |union(P,Q)|-|intersection(P,Q)|.
    * </p>
-   * 
-   * @see <a
-   *      href="http://en.wikipedia.org/wiki/Symmetric_difference#Symmetric_difference_on_measure_spaces">Wikipedia
-   *      Symmetric Difference</a>
    */
-  private List<ResultElem<String, Integer>> ngramSimilar(String queryValue) {
+  private List<ResultElem<String,Integer>> getNgramSimilar(
+                                                           String queryValue,
+                                                           boolean distinct)
+  {
 
-    List<ResultElem<String, Integer>> result = newResultList(0);
+    List<ResultElem<String,Integer>> result = newResultList();
 
     Set<String> queryNgrams = ngrams(queryValue);
 
@@ -137,6 +147,7 @@ public class NgramDict implements Dictionary<String, Integer> {
       if( terms==null ) continue;
 
       for(String termFound : terms) {
+        if( distinct && termFound.equals(queryValue) ) continue;
         if( termsSeen.contains(termFound) ) continue;
         termsSeen.add(termFound);
 
@@ -155,14 +166,14 @@ public class NgramDict implements Dictionary<String, Integer> {
     return result;
   }
   /* +***************************************************************** */
-  private List<ResultElem<String, Integer>> 
-          filterEligible(List<ResultElem<String, Integer>> candidates,
-                         int minDistSeen)
+  private List<ResultElem<String,Integer>> filterEligible(
+                                                          List<ResultElem<String,Integer>> candidates,
+                                                          int minDistSeen)
   {
-    List<ResultElem<String, Integer>> result =
+    List<ResultElem<String,Integer>> result =
         newResultList(candidates.size());
 
-    for(ResultElem<String, Integer> cand : candidates) {
+    for(ResultElem<String,Integer> cand : candidates) {
       if( eligible(cand.d, minDistSeen) ) result.add(cand);
     }
     return result;
@@ -171,6 +182,9 @@ public class NgramDict implements Dictionary<String, Integer> {
   private boolean eligible(int candidateDistance, int bestDistance) {
     // TODO: can this be optimized to use a smaller margin than ngramLen? No,
     // it is not obvious why ngramLen is a good choice, but it works.
+
+    // !! Don't put ngramLen on the right side of the equation, because it
+    // may cause integer overflow.
     return candidateDistance-ngramLen<=bestDistance;
   }
   /* +***************************************************************** */
@@ -188,10 +202,25 @@ public class NgramDict implements Dictionary<String, Integer> {
    *         value.
    */
   public List<ResultElem<String,Integer>> lookup(String queryValue) {
-
-    List<ResultElem<String, Integer>> tmp = ngramSimilar(queryValue);
-    List<ResultElem<String, Integer>> result = newResultList(0);
-    for(ResultElem<String, Integer> re : curate(queryValue, tmp)) {
+    return lookup(queryValue, false);
+  }
+  /*+******************************************************************/
+  /**
+   * @throws ConcurrentModificationException may be thrown in cases where the
+   *         dictionary is updated while a lookup tries to find a query
+   *         value.
+   */
+  public List<ResultElem<String,Integer>> lookupDistinct(String queryValue) {
+    return lookup(queryValue, true);
+  }
+  /*+******************************************************************/
+  private List<ResultElem<String,Integer>> lookup(String queryValue,
+                                                   boolean distinct)
+    {
+    List<ResultElem<String,Integer>> tmp =
+        getNgramSimilar(queryValue, distinct);
+    List<ResultElem<String,Integer>> result = newResultList();
+    for(ResultElem<String,Integer> re : curate(queryValue, tmp)) {
       result.add(re);
     }
     return curate(queryValue, tmp);
@@ -202,8 +231,8 @@ public class NgramDict implements Dictionary<String, Integer> {
    * curates a result provided by {@link #lookup(Object) lookup()} such that
    * it computes real distances according to the given metric. The method
    * compares the value in each result element with the given query and keeps
-   * only those, which are no more distant than {@code maxDist}. Calling
-   * this method really only makes sense as a post processing of the lookup()
+   * only those, which are no more distant than {@code maxDist}. Calling this
+   * method really only makes sense as a post processing of the lookup()
    * method and requires two constraints:
    * </p>
    * <ol>
@@ -218,15 +247,16 @@ public class NgramDict implements Dictionary<String, Integer> {
    *         trigram similarities and is sorted in ascending order of the
    *         metric distance values.
    */
-  private List<ResultElem<String, Integer>> 
-          curate(String query, List<ResultElem<String, Integer>> candidates)
+  private List<ResultElem<String,Integer>> curate(
+                                                  String query,
+                                                  List<ResultElem<String,Integer>> candidates)
   {
-    List<ResultElem<String, Integer>> result =
+    List<ResultElem<String,Integer>> result =
         newResultList(1+candidates.size()/2);
 
     int minDistSeen = Integer.MAX_VALUE;
 
-    for(ResultElem<String, Integer> re : candidates) {
+    for(ResultElem<String,Integer> re : candidates) {
       int d = metric.d(query, re.value);
 
       // drop insufficient candidates early
@@ -239,14 +269,14 @@ public class NgramDict implements Dictionary<String, Integer> {
     return filterBest(result, minDistSeen);
   }
   /* +***************************************************************** */
-  private List<ResultElem<String, Integer>> 
-          filterBest(List<ResultElem<String, Integer>> candidates,
-                     int bestDist)
+  private List<ResultElem<String,Integer>> filterBest(
+                                                      List<ResultElem<String,Integer>> candidates,
+                                                      int bestDist)
   {
-    List<ResultElem<String, Integer>> result =
+    List<ResultElem<String,Integer>> result =
         newResultList(candidates.size());
 
-    for(ResultElem<String, Integer> cand : candidates) {
+    for(ResultElem<String,Integer> cand : candidates) {
       if( cand.d==bestDist ) result.add(cand);
     }
     return result;
@@ -268,7 +298,7 @@ public class NgramDict implements Dictionary<String, Integer> {
     long start = System.currentTimeMillis();
     int r = 0;
     for(int i = 1; i<argv.length; i++) {
-      List<ResultElem<String, Integer>> l = t.lookup(argv[i]);
+      List<ResultElem<String,Integer>> l = t.lookup(argv[i]);
       r = r+l.size();
       if( i%1000==0 ) System.out.println(i);
       /*

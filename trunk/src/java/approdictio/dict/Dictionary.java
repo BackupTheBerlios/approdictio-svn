@@ -44,12 +44,29 @@ public interface Dictionary<T, DTYPE> {
    * values. The similarity depends on the implementation. An implementation
    * is allowed to return an empty list, if no element in the dictionary is
    * sufficiently similar to {@code queryValue}. If the result contains more
-   * than one element, all its elements are equally similar to
-   * {@code queryValue}.
+   * than one element, all its elements are equally similar to {@code
+   * queryValue}.
    * </p>
    * 
    * @return a possibly empty list of result elements holding dictionary
-   *         entries most similar to the query.
+   *         entries most similar to the query. If the query value is
+   *         contained in the dictionary, the result would typically include
+   *         it, as it should be most similar to itself. If this is not
+   *         intended, use {@link #lookupDistinct lookupDistinct}.
    */
-  List<ResultElem<T, DTYPE>> lookup(T queryValue);
+  List<ResultElem<T,DTYPE>> lookup(T queryValue);
+  
+  /**
+   * <p>
+   * looks up {@code queryValue} in the dictionary and returns similar
+   * values, but never the {@code queryValue} itself.
+   * </p>
+   * 
+   * @return a possibly empty list of result elements holding dictionary
+   *         entries most similar to the query. If the query value is
+   *         contained in the dictionary, it is disregarded to make sure
+   *         other values are found.
+   */
+  List<ResultElem<T,DTYPE>> lookupDistinct(T queryValue);
+  
 }

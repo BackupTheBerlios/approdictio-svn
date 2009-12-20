@@ -24,7 +24,7 @@ import java.util.List;
  * some static utility methods.
  * </p>
  */
-public class Util {
+class Util {
   private Util() {
   }
   /* +***************************************************************** */
@@ -34,12 +34,12 @@ public class Util {
     return new ResultElem<String, Integer>(value, dist);
   }
   /* +***************************************************************** */
+  public static List<ResultElem<String, Integer>> newResultList() {
+    return new ArrayList<ResultElem<String, Integer>>();
+  }
+  /* +***************************************************************** */
   public static List<ResultElem<String, Integer>> newResultList(int size) {
-    if( size==0 ) {
-      return new ArrayList<ResultElem<String, Integer>>();
-    } else {
-      return new ArrayList<ResultElem<String, Integer>>(size);
-    }
+    return new ArrayList<ResultElem<String, Integer>>(size);
   }
   /* +***************************************************************** */
   /**
