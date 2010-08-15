@@ -59,8 +59,6 @@ public class NgramDict
 
   private final IntMetric<String> metric;
 
-  //private final int maxDist;
-
   // an index mapping ngrams to their strings.
   private final Map<String,Set<String>> index =
       new HashMap<String,Set<String>>();
@@ -73,9 +71,6 @@ public class NgramDict
    * @param ngramLen is the length of the n-grams use, must be greater zero
    * @param metric is the metric used to compare strings <em>after</em>
    *        candidates were retrieved using ngram-metric.
-   * @param maxDist is used as a cutoff when retrieving candidates according
-   *        to ngram-metric (2 is a good candidate for most cases)
-   * 
    * @throws IllegalArgumentException if {@code ngramLen} is not greater
    *         zero.
    */

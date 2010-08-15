@@ -28,7 +28,7 @@ import approdictio.levenshtein.LevenshteinMetric;
  * <p>
  * <p>
  * In a typical use case, first  elements are {@link #add(Object) add}ed
- * to the tree. Then {@link #lookup(Object) lookup(query)}
+ * to the tree. Then {@link #lookup(Object,Integer) lookup(query)}
  * finds values that are at most {@code maxDist} away from your {@code query},
  * where {@code maxDist} is the maximum distance specified in the constructor.
  * </p>
@@ -53,21 +53,15 @@ public class BKTree<V> implements Dictionary<V, Integer> {
 
   private final IntMetric<V> metric;
 
-  //private final int maxDist;
-
   // +********************************************************************
   /**
    * <p>
    * creates a BKTree to store objects of type T while using the metric
    * provided to organize lookup.
    * </p>
-   * 
-   * @param maxDist is used when looking up values to restrict to those that
-   *        are no farther away from the query than {@code maxDist}.
    */
   public BKTree(IntMetric<V> metric) {
     this.metric = metric;
-    //this.maxDist = maxDist;
   }
 
   // +********************************************************************

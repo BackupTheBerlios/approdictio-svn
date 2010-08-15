@@ -18,7 +18,7 @@ import java.util.Comparator;
 /**
  * <p>
  * defines result elements returned by
- * {@link Dictionary#lookup(Object) lookup()}.
+ * {@link Dictionary#lookup(Object,Object) lookup()}.
  * </p>
  */
 public class ResultElem<T, DTYPE> {
