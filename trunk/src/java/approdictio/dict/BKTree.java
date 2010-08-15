@@ -53,7 +53,7 @@ public class BKTree<V> implements Dictionary<V, Integer> {
 
   private final IntMetric<V> metric;
 
-  private final int maxDist;
+  //private final int maxDist;
 
   // +********************************************************************
   /**
@@ -65,9 +65,9 @@ public class BKTree<V> implements Dictionary<V, Integer> {
    * @param maxDist is used when looking up values to restrict to those that
    *        are no farther away from the query than {@code maxDist}.
    */
-  public BKTree(IntMetric<V> metric, int maxDist) {
+  public BKTree(IntMetric<V> metric) {
     this.metric = metric;
-    this.maxDist = maxDist;
+    //this.maxDist = maxDist;
   }
 
   // +********************************************************************
@@ -196,19 +196,21 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   /**
    * <p>
    * looks up the given value and returns all values stored that are at most
-   * {@code maxDist} away from the given value. In particular a value
-   * {@code x} is returned, if {@code metric.d(queryValue, x)<=maxDist}.
+   * {@code maxDist} away from the given value. In particular a value {@code
+   * x} is returned, if {@code metric.d(queryValue, x)<=maxDist}.
    * </p>
    */
-  public List<ResultElem<V, Integer>> lookup(V queryValue) {
-    return lookup(queryValue, false);
+  public List<ResultElem<V,Integer>> lookup(V queryValue, Integer maxDist) {
+    return lookup(queryValue, maxDist, false);
   }
   /*+******************************************************************/
-  public List<ResultElem<V, Integer>> lookupDistinct(V queryValue) {
-    return lookup(queryValue, true);
+  public List<ResultElem<V, Integer>> lookupDistinct(V queryValue, 
+                                                     Integer maxDist) {
+    return lookup(queryValue, maxDist, true);
   }
   /*+******************************************************************/
-  private List<ResultElem<V,Integer>> lookup(V queryValue, boolean distinct) {
+  private List<ResultElem<V,Integer>> lookup(V queryValue, 
+                                             int maxDist, boolean distinct) {
     List<ResultElem<V,Integer>> result =
         new ArrayList<ResultElem<V,Integer>>();
 
@@ -220,8 +222,10 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     return filterBest(result, bestDist);
   }
   /*+******************************************************************/
-  private List<ResultElem<V, Integer>> filterBest(List<ResultElem<V, Integer>> candidates,
-                                                  int bestDist) {
+  private List<ResultElem<V, Integer>> 
+  filterBest(List<ResultElem<V, Integer>> candidates,
+             int bestDist) {
+
     List<ResultElem<V, Integer>> result = 
       new ArrayList<ResultElem<V, Integer>>(candidates.size());
     for(ResultElem<V,Integer> cand : candidates) {
@@ -238,14 +242,14 @@ public class BKTree<V> implements Dictionary<V, Integer> {
    * @param argv
    */
   public static void main(String[] argv) throws Exception {
-    BKTree<String> t = new BKTree<String>(new LevenshteinMetric(), 2);
+    BKTree<String> t = new BKTree<String>(new LevenshteinMetric());
     Util.readFileDict(argv[0], t);
 
     // t.dump(System.out);
     int sum = 0;
     long start = System.currentTimeMillis();
     for(int i = 1; i < argv.length; i++) {
-      List<ResultElem<String, Integer>> l = t.lookup(argv[i]);
+      List<ResultElem<String, Integer>> l = t.lookup(argv[i], 2);
       sum = sum + l.size();
       if( i % 1000 == 0 ) System.out.println(i);
       

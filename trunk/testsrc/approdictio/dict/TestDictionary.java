@@ -23,8 +23,8 @@ public class TestDictionary {
     Dictionary<String,Integer>[] ds = new Dictionary[2];
 
     dicts = ds;
-    dicts[0] =  new BKTree<String>(lev, 2);
-    dicts[1] = new NgramDict(3, lev, 3);
+    dicts[0] =  new BKTree<String>(lev);
+    dicts[1] = new NgramDict(3, lev);
     
     random = new Random(1);
   }
@@ -43,9 +43,9 @@ public class TestDictionary {
         d.add(term);
       }
       for(String term : ttt) {
-        List<ResultElem<String,Integer>> l = d.lookup(term);
+        List<ResultElem<String,Integer>> l = d.lookup(term, 2);
         assertEquals(name, 1, l.size());
-        assertEquals(name, 0, l.get(0).d);
+        assertEquals(name, Integer.valueOf(0), l.get(0).d);
         assertEquals(name, term, l.get(0).value);
       }
     }
@@ -63,9 +63,9 @@ public class TestDictionary {
         d.add(term+"x");
       }
       for(String term : dictTerm) {
-        List<ResultElem<String,Integer>> l = d.lookupDistinct(term);
+        List<ResultElem<String,Integer>> l = d.lookupDistinct(term, 2);
         assertEquals(name, 1, l.size());
-        assertEquals(name, 1, l.get(0).d);
+        assertEquals(name, Integer.valueOf(1), l.get(0).d);
         assertEquals(name, term+"x", l.get(0).value);
       }
     }
@@ -75,8 +75,8 @@ public class TestDictionary {
   public void zeroResults() {
     for(Dictionary<String,Integer> d : dicts) {
       d.add("aaaaa");
-      assertEquals(0, d.lookup("zzzz").size());
-      assertEquals(0, d.lookupDistinct("zzzz").size());
+      assertEquals(0, d.lookup("zzzz", 2).size());
+      assertEquals(0, d.lookupDistinct("zzzz", 2).size());
     }    
   }
   /*+******************************************************************/
@@ -89,10 +89,10 @@ public class TestDictionary {
       for(String term : ttt) d.add(term);
       String name = d.getClass().getName();
 
-      List<ResultElem<String,Integer>> l = d.lookup("abcde");
+      List<ResultElem<String,Integer>> l = d.lookup("abcde", 2);
       assertEquals(name, 2, l.size());
 
-      l = d.lookupDistinct("abcde");
+      l = d.lookupDistinct("abcde", 2);
       assertEquals(name, 2, l.size());
       
       Set<String> s = new HashSet<String>(2);
@@ -106,7 +106,7 @@ public class TestDictionary {
   /*+******************************************************************/
   @Test(expected=IllegalArgumentException.class)
   public void zeroNgram() {
-    new NgramDict(0, new LevenshteinMetric(), 2);
+    new NgramDict(0, new LevenshteinMetric());
   }
   /*+******************************************************************/
   @Test
@@ -118,18 +118,18 @@ public class TestDictionary {
       for(String term : ttt) d.add(term);
       String name = d.getClass().getName();
 
-      List<ResultElem<String,Integer>> l = d.lookup("00000a00000bbbbbbbbbb");
+      List<ResultElem<String,Integer>> l = d.lookup("00000a00000bbbbbbbbbb",2);
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[2], l.get(0).value);
 
-      l = d.lookupDistinct("00000a00000bbbbbbbbbb");
+      l = d.lookupDistinct("00000a00000bbbbbbbbbb",2);
       assertEquals(name, 0, l.size());
       
-      l = d.lookup("00000a00000bbbbbbbbbc");
+      l = d.lookup("00000a00000bbbbbbbbbc",2);
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[2], l.get(0).value);
 
-      l = d.lookupDistinct("00000a00000bbbbbbbbbc");
+      l = d.lookupDistinct("00000a00000bbbbbbbbbc",2);
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[2], l.get(0).value);
 
@@ -139,7 +139,7 @@ public class TestDictionary {
   @Test
   public void lookupOnEmptyDict() throws Exception {
     for(Dictionary<String,Integer> dict : dicts) {
-      dict.lookup("abc");
+      dict.lookup("abc",2);
     }
   }
   /*+******************************************************************/
@@ -192,7 +192,7 @@ public class TestDictionary {
       int count = -1;
       for(int i=0; i<2*numWords; i++) {
         try {
-          dict.lookup("abcdeffedcbafcabaceefaaabbbcccdddeeefff");
+          dict.lookup("abcdeffedcbafcabaceefaaabbbcccdddeeefff",2);
           count = i;
         } catch( ConcurrentModificationException ce) {
           e = ce;
@@ -212,10 +212,10 @@ public class TestDictionary {
       String name = dict.getClass().getName();
       dict.add("blabla");
       dict.add("blabla");
-      List<ResultElem<String,Integer>> l = dict.lookup("blabla");
+      List<ResultElem<String,Integer>> l = dict.lookup("blabla",2);
       assertEquals(name, 1, l.size());
 
-      l = dict.lookupDistinct("blibla");
+      l = dict.lookupDistinct("blibla",2);
       assertEquals(name, 1, l.size());
     }    
   }

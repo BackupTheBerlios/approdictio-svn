@@ -40,21 +40,28 @@ public interface Dictionary<T, DTYPE> {
 
   /**
    * <p>
-   * looks up {@code queryValue} in the dictionary and returns similar
-   * values. The similarity depends on the implementation. An implementation
-   * is allowed to return an empty list, if no element in the dictionary is
-   * sufficiently similar to {@code queryValue}. If the result contains more
-   * than one element, all its elements are equally similar to {@code
-   * queryValue}.
+   * looks up {@code queryValue} in the dictionary and returns values that
+   * are sufficiently similar or close to the query value according to the
+   * given {@code limit}. The similarity depends on the implementation. An
+   * implementation is allowed to return an empty list, if no element in the
+   * dictionary is sufficiently similar to {@code queryValue}. If the result
+   * contains more than one element, all its elements are equally similar to
+   * {@code queryValue}.
    * </p>
    * 
+   * @param queryValue is the value for which similar or close values are
+   *        sought
+   * @param limit defines that values found must be either closer to the
+   *        query than {@code limit} or more similar than {@code limit},
+   *        depending on whether a distance or similarity measure is used by
+   *        this dictionary.
    * @return a possibly empty list of result elements holding dictionary
    *         entries most similar to the query. If the query value is
    *         contained in the dictionary, the result would typically include
    *         it, as it should be most similar to itself. If this is not
    *         intended, use {@link #lookupDistinct lookupDistinct}.
    */
-  List<ResultElem<T,DTYPE>> lookup(T queryValue);
+  List<ResultElem<T,DTYPE>> lookup(T queryValue, DTYPE limit);
   
   /**
    * <p>
@@ -67,6 +74,6 @@ public interface Dictionary<T, DTYPE> {
    *         contained in the dictionary, it is disregarded to make sure
    *         other values are found.
    */
-  List<ResultElem<T,DTYPE>> lookupDistinct(T queryValue);
+  List<ResultElem<T,DTYPE>> lookupDistinct(T queryValue, DTYPE limit);
   
 }

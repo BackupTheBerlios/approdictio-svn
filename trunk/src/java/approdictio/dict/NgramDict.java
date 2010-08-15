@@ -59,7 +59,7 @@ public class NgramDict
 
   private final IntMetric<String> metric;
 
-  private final int maxDist;
+  //private final int maxDist;
 
   // an index mapping ngrams to their strings.
   private final Map<String,Set<String>> index =
@@ -79,14 +79,13 @@ public class NgramDict
    * @throws IllegalArgumentException if {@code ngramLen} is not greater
    *         zero.
    */
-  public NgramDict(int ngramLen, IntMetric<String> metric, int maxDist) {
+  public NgramDict(int ngramLen, IntMetric<String> metric) {
     if( ngramLen<1 ) {
       throw new IllegalArgumentException("n must be greater zero "
           +" but is "+ngramLen);
     }
     this.ngramLen = ngramLen;
     this.metric = metric;
-    this.maxDist = maxDist;
   }
   /* +***************************************************************** */
   public void add(String value) {
@@ -98,7 +97,6 @@ public class NgramDict
       }
       values.add(value);
     }
-    // System.out.printf("%s->%s%n", value, ngrams);
   }
   /* +***************************************************************** */
   private Set<String> ngrams(String s) {
@@ -201,8 +199,9 @@ public class NgramDict
    *         dictionary is updated while a lookup tries to find a query
    *         value.
    */
-  public List<ResultElem<String,Integer>> lookup(String queryValue) {
-    return lookup(queryValue, false);
+  public List<ResultElem<String,Integer>> lookup(String queryValue,
+                                                 Integer maxDist) {
+    return lookup(queryValue, maxDist, false);
   }
   /*+******************************************************************/
   /**
@@ -210,20 +209,22 @@ public class NgramDict
    *         dictionary is updated while a lookup tries to find a query
    *         value.
    */
-  public List<ResultElem<String,Integer>> lookupDistinct(String queryValue) {
-    return lookup(queryValue, true);
+  public List<ResultElem<String,Integer>> lookupDistinct(String queryValue,
+                                                         Integer maxDist) {
+    return lookup(queryValue, maxDist, true);
   }
   /*+******************************************************************/
   private List<ResultElem<String,Integer>> lookup(String queryValue,
-                                                   boolean distinct)
+                                                  int maxDist,
+                                                  boolean distinct)
     {
     List<ResultElem<String,Integer>> tmp =
         getNgramSimilar(queryValue, distinct);
     List<ResultElem<String,Integer>> result = newResultList();
-    for(ResultElem<String,Integer> re : curate(queryValue, tmp)) {
+    for(ResultElem<String,Integer> re : curate(queryValue, maxDist, tmp)) {
       result.add(re);
     }
-    return curate(queryValue, tmp);
+    return curate(queryValue, maxDist, tmp);
   }
   /* +***************************************************************** */
   /**
@@ -247,9 +248,9 @@ public class NgramDict
    *         trigram similarities and is sorted in ascending order of the
    *         metric distance values.
    */
-  private List<ResultElem<String,Integer>> curate(
-                                                  String query,
-                                                  List<ResultElem<String,Integer>> candidates)
+  private List<ResultElem<String,Integer>> 
+  curate(String query, int maxDist,
+         List<ResultElem<String,Integer>> candidates)
   {
     List<ResultElem<String,Integer>> result =
         newResultList(1+candidates.size()/2);
@@ -292,13 +293,13 @@ public class NgramDict
   public static void main(String[] argv) throws Exception {
     IntMetric<String> metric =
         new LevenshteinMetric(CostFunctions.caseIgnore);
-    NgramDict t = new NgramDict(4, metric, 2);
+    NgramDict t = new NgramDict(4, metric);
     Util.readFileDict(argv[0], t);
     System.out.println("starting lookup");
     long start = System.currentTimeMillis();
     int r = 0;
     for(int i = 1; i<argv.length; i++) {
-      List<ResultElem<String,Integer>> l = t.lookup(argv[i]);
+      List<ResultElem<String,Integer>> l = t.lookup(argv[i], 2);
       r = r+l.size();
       if( i%1000==0 ) System.out.println(i);
       /*

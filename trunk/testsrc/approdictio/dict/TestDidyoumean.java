@@ -22,7 +22,7 @@ public class TestDidyoumean {
     dyms = new Didyoumean[2];
 
     dyms[0] = Didyoumean.instanceBKTree(lev, 2);
-    dyms[1] = Didyoumean.instanceNgramDict(3, lev, 5);
+    dyms[1] = Didyoumean.instanceNgramDict(3, lev);
   }
   /*+******************************************************************/
   private static final class WeightedTerm {
@@ -50,28 +50,28 @@ public class TestDidyoumean {
       for(WeightedTerm p: ttt) dym.add(p.term, p.w);
       String name = dym.getDictClass().getName();
 
-      List<ResultElem<String,Integer>> l = dym.lookup("abcde");
+      List<ResultElem<String,Integer>> l = dym.lookup("abcde",2);
       assertEquals(name, 3, l.size());
-      assertEquals(name, 11, l.get(0).d);
-      assertEquals(name, 11, l.get(1).d);
-      assertEquals(name, 11, l.get(2).d);
+      assertEquals(name, Integer.valueOf(11), l.get(0).d);
+      assertEquals(name, Integer.valueOf(11), l.get(1).d);
+      assertEquals(name, Integer.valueOf(11), l.get(2).d);
 
-      l = dym.lookupDistinct("abcd4e");
+      l = dym.lookupDistinct("abcd4e",2);
       assertEquals(name, 2, l.size());
-      assertEquals(name, 11, l.get(0).d);
-      assertEquals(name, 11, l.get(1).d);
+      assertEquals(name, Integer.valueOf(11), l.get(0).d);
+      assertEquals(name, Integer.valueOf(11), l.get(1).d);
       
-      l = dym.lookup("fiffa");
+      l = dym.lookup("fiffa",2);
       assertEquals(name, 1, l.size());
       assertEquals(name, ttt[4].term, l.get(0).value);
-      assertEquals(name, 4, l.get(0).d);
+      assertEquals(name, Integer.valueOf(4), l.get(0).d);
       
       // try the trivial things too
       for(int i=0; i<4; i++) {
-        l = dym.lookup(ttt[i].term);
+        l = dym.lookup(ttt[i].term,2);
         assertEquals(name, 1, l.size());
         assertEquals(name, ttt[i].term, l.get(0).value);
-        assertEquals(name, ttt[i].w, l.get(0).d);
+        assertEquals(name, Integer.valueOf(ttt[i].w), l.get(0).d);
       }
     }
   }
@@ -88,7 +88,7 @@ public class TestDidyoumean {
       dym.addFile(r, ':');
       String name = dym.getDictClass().getName();
 
-      List<ResultElem<String,Integer>> l = dym.lookup("ab.de");
+      List<ResultElem<String,Integer>> l = dym.lookup("ab.de",2);
       assertEquals(name, 1, l.size());
       assertEquals(name, "abYdef", l.get(0).value);
     }

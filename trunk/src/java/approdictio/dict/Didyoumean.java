@@ -61,10 +61,9 @@ public class Didyoumean {
    * </p>
    */
   public static Didyoumean instanceNgramDict(int n,
-                                             IntMetric<String> metric,
-                                             int maxDist)
+                                             IntMetric<String> metric)
   {
-    return new Didyoumean(new NgramDict(n, metric, maxDist));
+    return new Didyoumean(new NgramDict(n, metric));
   }
   /* +***************************************************************** */
   /**
@@ -72,11 +71,9 @@ public class Didyoumean {
    * creates a {@code Didyoumean} backed by a {@link BKTree}.
    * </p>
    */
-  public static Didyoumean instanceBKTree(IntMetric<String> metric,
-                                          int maxDist)
+  public static Didyoumean instanceBKTree(IntMetric<String> metric)
   {
-    final Dictionary<String, Integer> d =
-        new BKTree<String>(metric, maxDist);
+    final Dictionary<String, Integer> d = new BKTree<String>(metric);
     return new Didyoumean(d);
   }
   /* +***************************************************************** */
@@ -195,8 +192,8 @@ public class Didyoumean {
    * @return the list of stored elements most similar to {@code word} that
    *         have the highest weight assigned.
    */
-  public List<ResultElem<String, Integer>> lookup(String word) {
-    return lookup(word, false);
+  public List<ResultElem<String, Integer>> lookup(String word, Integer maxDist) {
+    return lookup(word, maxDist, false);
   }
   /* +***************************************************************** */
   /**
@@ -205,20 +202,22 @@ public class Didyoumean {
    * even if it is in the dictionary.
    * </p>
    */
-  public List<ResultElem<String,Integer>> lookupDistinct(String word) {
-    return lookup(word, true);
+  public List<ResultElem<String,Integer>> lookupDistinct(String word,
+                                                         Integer maxDist) {
+    return lookup(word, maxDist, true);
   }
   /* +***************************************************************** */
   private List<ResultElem<String,Integer>> lookup(String word,
-                                                 boolean distinct)
+                                                  int maxDist,
+                                                  boolean distinct)
   {
     List<ResultElem<String,Integer>> result = newResultList();
 
     List<ResultElem<String,Integer>> similarWords;
     if( distinct ) {
-      similarWords = dict.lookupDistinct(word);
+      similarWords = dict.lookupDistinct(word, maxDist);
     } else {
-      similarWords = dict.lookup(word);
+      similarWords = dict.lookup(word, maxDist);
     }
     int bestWeight = convertToWeights(similarWords, result);
 
@@ -269,17 +268,18 @@ public class Didyoumean {
   public static void main(String[] argv) throws Exception {
     IntMetric<String> metric =
         new LevenshteinMetric(CostFunctions.caseIgnore);
-    Didyoumean dym = instanceNgramDict(3, metric, 2);
-    // Didyoumean dym = instanceBKTree(metric, 2);
+    //Didyoumean dym = instanceNgramDict(3, metric);
+    Didyoumean dym = instanceBKTree(metric);
     long start = System.currentTimeMillis();
     dym.addFile(argv[0], ':', "UTF-8");
     long end = System.currentTimeMillis();
     System.out.printf("reading dict took %dms, now starting lookup%n", end
         - start);
     start = System.currentTimeMillis();
+    Thread.sleep(1000000000);
     int count = 0;
     for(int i = 1; i < argv.length; i++) {
-      List<ResultElem<String, Integer>> res = dym.lookup(argv[i]);
+      List<ResultElem<String, Integer>> res = dym.lookup(argv[i],2);
       count = count + res.size();
       System.out.printf("%s->%s%n", argv[i], res);
     }
