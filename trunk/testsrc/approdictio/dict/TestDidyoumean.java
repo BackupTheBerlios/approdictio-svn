@@ -21,7 +21,7 @@ public class TestDidyoumean {
 
     dyms = new Didyoumean[2];
 
-    dyms[0] = Didyoumean.instanceBKTree(lev, 2);
+    dyms[0] = Didyoumean.instanceBKTree(lev);
     dyms[1] = Didyoumean.instanceNgramDict(3, lev);
   }
   /*+******************************************************************/

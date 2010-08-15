@@ -220,6 +220,29 @@ public class TestDictionary {
     }    
   }
   /*+******************************************************************/
+  @Test
+  public void testDifferentMaxDist() {
+    for(Dictionary<String,Integer> dict : dicts) {
+      String name = dict.getClass().getName();
+      dict.add("aaa1aaa");
+      dict.add("aaa11112222aaa");
+      List<ResultElem<String,Integer>> l = dict.lookup("aaa11aaa",2);
+      assertEquals(name, 1, l.size());
+
+      l = dict.lookup("aaa11aaa", 3);
+      assertEquals(name, 1, l.size());
+      assertEquals(name, "aaa1aaa", l.get(0).value);
+
+      l = dict.lookup("aaa1111aaa", 3);
+      assertEquals(name, 1, l.size());
+      assertEquals(name, "aaa1aaa", l.get(0).value);
+
+      l = dict.lookup("aaa11112aaa", 3);
+      assertEquals(name, 1, l.size());
+      assertEquals(name, "aaa11112222aaa", l.get(0).value);
+}
+  }
+  /*+******************************************************************/
 
 
 }
