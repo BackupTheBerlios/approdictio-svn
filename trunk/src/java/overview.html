@@ -13,6 +13,11 @@
   <em>similar</em> depends on the implementation used for the {@link
   approdictio.dict.IntMetric}.</p>
 
-    <p>A combination of distance measure and frequency weighting provides
-    {@link approdictio.dict.Didyoumean}.</p>
+    <p>A combination of distance measure and frequency weighting is provided
+    by the combination of {@link approdictio.dict.BKTree} and
+    {@link approdictio.dict.BKStableLookup}. 
+    It requires that words are added to the {@code BKTree} strictly in the
+    order of descending weight. If this is not feasible, 
+    {@link approdictio.dict.Didyoumean} provides an alternative but less
+    elegant implementation.</p>
 </body>

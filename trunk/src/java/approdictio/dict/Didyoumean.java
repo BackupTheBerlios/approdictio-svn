@@ -25,24 +25,30 @@ import java.util.Map;
 import approdictio.levenshtein.CostFunctions;
 import approdictio.levenshtein.LevenshteinMetric;
 import static approdictio.dict.Util.*;
+
 /**
  * <p>
  * is an implementation of a <em>did you mean</em> based on a
- * {@link Dictionary}. In addition to similarity lookup &mdash or rather
+ * {@link Dictionary}. In addition to similarity lookup &mdash; or rather
  * distance based approximate lookup &mdash; the list of equal distance
  * results is further weighted and sorted according to a weight available for
- * each dictionary term. The weights can be frequencies of the
- * term occuring in a corpus.
+ * each dictionary term. The weights can be frequencies of the term occuring
+ * in a corpus.
  * </p>
  * <p>
  * To create a {@code Didyoumean}, use one of the factory methods. The
- * backing {@code Dictionary} depends on the facotry method used. While
- * {@link NgramDict} ({@link #instanceNgramDict instanceNgramDict}) seems
- * to be about three times faster (in completely unscientific comparisons),
- * the {@link BKTree} ({@link #instanceBKTree instanceBKTree}) provides a
+ * backing {@code Dictionary} depends on the factory method used. While
+ * {@link NgramDict} ({@link #instanceNgramDict instanceNgramDict}) seems to
+ * be about three times faster (in completely unscientific comparisons), the
+ * {@link BKTree} ({@link #instanceBKTree instanceBKTree}) provides a
  * 100%-Levenshtein implementation for the term distance.
  * </p>
  * 
+ * <p>
+ * <strong>Hint:</strong> Instead of this class, it may be space and possible
+ * more time efficient to use a combination of a {@link BKTree} that is
+ * filled with terms in the order of descending weight and then use a
+ * {@link BKStableLookup} to fetch results.</p>
  */
 public class Didyoumean {
   private final Dictionary<String, Integer> dict;

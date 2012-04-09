@@ -14,10 +14,7 @@
 package approdictio.dict;
 
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.List;
-
-import approdictio.levenshtein.LevenshteinMetric;
 
 /**
  * <p>
@@ -34,7 +31,7 @@ import approdictio.levenshtein.LevenshteinMetric;
  * </p>
  * 
  * <p>
- * There is currently no way to delete values from the tree.
+ * This class provides no way to delete values from the tree.
  * </p>
  * 
  * @param <V> the type of objects to be stored in the tree. To use the
@@ -65,14 +62,22 @@ public class BKTree<V> implements Dictionary<V, Integer> {
   }
 
   // +********************************************************************
-  private interface LinkTable<T> {
+  IntMetric<V> getMetric() {
+    return metric;
+  }
+  // +********************************************************************
+  BKNode<V> getRoot() {
+    return root;
+  }
+  // +********************************************************************
+  interface LinkTable<T> {
     BKNode<T> get(int d);
     BKNode<T> set(int d, BKNode<T> node);
     int size();
   }
 
   // +********************************************************************
-  private static class ArrayLinkTable<T> implements LinkTable<T> {
+  static class ArrayLinkTable<T> implements LinkTable<T> {
     @SuppressWarnings("unchecked")
     private BKNode<T>[] a = new BKNode[0];
 
@@ -97,36 +102,6 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     }
   }
 
-  // +********************************************************************
-  private static class BKNode<V> {
-    private final V value;
-
-    private final LinkTable<V> links;
-
-    public BKNode(V value) {
-      this.value = value;
-      this.links = new ArrayLinkTable<V>();
-    }
-    public V getValue() {
-      return value;
-    }
-    public void set(int d, BKNode<V> node) {
-      links.set(d, node);
-    }
-    public BKNode<V> get(int d) {
-      return links.get(d);
-    }
-    public void dump(Appendable out, int d, String indent) {
-      Formatter f = new Formatter(out);
-      f.format("%s%d: %s%n", indent, d, value);
-      int l = links.size();
-      for(int i = 0; i < l; i++) {
-        BKNode<V> node = links.get(i);
-        if( node == null ) continue;
-        node.dump(out, i, "  " + indent);
-      }
-    }
-  }
   // +********************************************************************
   private void add(BKNode<V> node, V token) {
     int d = metric.d(node.getValue(), token);
@@ -228,35 +203,4 @@ public class BKTree<V> implements Dictionary<V, Integer> {
     return result;
   }
   // +********************************************************************
-  /**
-   * <p>
-   * for testing purposes only.
-   * </p>
-   * 
-   * @param argv
-   */
-  public static void main(String[] argv) throws Exception {
-    BKTree<String> t = new BKTree<String>(new LevenshteinMetric());
-    Util.readFileDict(argv[0], t);
-
-    // t.dump(System.out);
-    int sum = 0;
-    long start = System.currentTimeMillis();
-    for(int i = 1; i < argv.length; i++) {
-      List<ResultElem<String, Integer>> l = t.lookup(argv[i], 2);
-      sum = sum + l.size();
-      if( i % 1000 == 0 ) System.out.println(i);
-      
-      /* * /
-      System.out.printf("%s -->", argv[i]);
-      for(ResultElem<String, Integer> e : l) {
-        System.out.printf(" %s", e);
-      }
-      System.out.println();
-      /* */
-    }
-    long end = System.currentTimeMillis();
-    double avg = ((double) (end - start)) / (double) (argv.length - 1);
-    System.out.printf("avg lookup: %.3fms%n", avg);
-  }
 }

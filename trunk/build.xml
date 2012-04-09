@@ -14,6 +14,7 @@
       fork="false"
       debug="true"
       deprecation="true"
+      includeantruntime="false"
       >
       <compilerarg value="-Xlint:unchecked"/>
       <patternset includes="approdictio/**/*.java"
@@ -99,6 +100,7 @@
       fork="false"
       debug="true"
       deprecation="true"
+      includeantruntime="true"
       >
       <compilerarg value="-Xlint:unchecked"/>
       <patternset includes="**/*.java" />
